@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/order_item.dart';
 import '../models/product.dart';
+import '../models/modifier.dart';
 
 class CartNotifier extends Notifier<List<OrderItem>> {
   @override
@@ -9,7 +10,7 @@ class CartNotifier extends Notifier<List<OrderItem>> {
   }
 
   void addQuickTap(Product product) {
-    state = [...state, OrderItem(product: product, selectedModifiers: [])];
+    state = [...state, OrderItem(product: product, selectedModifiers: const <ModifierOption>[])];
   }
 
   void addConfiguredItem(OrderItem item) {
