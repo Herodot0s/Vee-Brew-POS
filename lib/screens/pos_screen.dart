@@ -2,26 +2,28 @@ import 'package:flutter/material.dart';
 import '../widgets/category_sidebar.dart';
 import '../widgets/product_grid.dart';
 import '../widgets/order_ticket.dart';
+import '../theme/binance_theme.dart';
 
 class POSScreen extends StatelessWidget {
   const POSScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
+      backgroundColor: BinanceTheme.canvasDark,
       body: Row(
         children: [
-          const Expanded(
+          Expanded(
             flex: 2,
             child: CategorySidebar(),
           ),
-          const VerticalDivider(width: 1),
-          const Expanded(
+          VerticalDivider(width: 1, color: BinanceTheme.surfaceElevatedDark),
+          Expanded(
             flex: 5,
             child: ProductGrid(),
           ),
-          const VerticalDivider(width: 1),
-          const Expanded(
+          VerticalDivider(width: 1, color: BinanceTheme.surfaceElevatedDark),
+          Expanded(
             flex: 3,
             child: OrderTicket(),
           ),

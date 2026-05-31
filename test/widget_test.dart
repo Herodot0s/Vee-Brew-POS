@@ -9,7 +9,7 @@ void main() {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const ProviderScope(child: VeebrewApp()));
 
-    // Verify that the POSScreen placeholder is shown.
-    expect(find.text('POS Screen Placeholder'), findsOneWidget);
+    // Verify that the POSScreen with VEEBREW sidebar title is shown.
+    expect(find.text('VEEBREW'), findsOneWidget);
   });
 }
