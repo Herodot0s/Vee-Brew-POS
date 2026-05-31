@@ -1,0 +1,71 @@
+<h2>Customization Flow (Sugar, Ice, Add-ons)</h2>
+<p class="subtitle">When a cashier taps an item that needs customization, what happens?</p>
+
+<div class="split" style="gap: 20px; align-items: stretch;">
+  <div class="mockup" data-choice="modal" onclick="toggleSelect(this)" style="cursor: pointer; flex: 1;">
+    <div class="mockup-header">Option A: Modal / Popup</div>
+    <div class="mockup-body" style="display: flex; height: 300px; padding: 10px; position: relative;">
+      <!-- Background faded -->
+      <div style="opacity: 0.3; width: 100%; display: flex;">
+        <div style="width: 80px; border-right: 1px solid var(--border);"></div>
+        <div style="flex: 1;"></div>
+        <div style="width: 150px; border-left: 1px solid var(--border);"></div>
+      </div>
+      <!-- Modal -->
+      <div style="position: absolute; top: 30px; left: 50px; right: 50px; bottom: 30px; background: var(--bg); border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-radius: 8px; display: flex; flex-direction: column;">
+        <div style="padding: 15px; border-bottom: 1px solid var(--border); font-weight: bold;">Customize: Classic Milk Tea</div>
+        <div style="flex: 1; padding: 15px; display: flex; gap: 20px;">
+          <div style="flex: 1;">
+            <div class="label">Sugar</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;">
+              <div class="placeholder" style="width: 40px; height: 30px; line-height: 30px; text-align: center;">0%</div>
+              <div class="placeholder" style="width: 40px; height: 30px; line-height: 30px; text-align: center;">50%</div>
+              <div class="placeholder" style="width: 40px; height: 30px; line-height: 30px; text-align: center; border-color: var(--accent);">100%</div>
+            </div>
+          </div>
+          <div style="flex: 1;">
+            <div class="label">Ice</div>
+             <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px;">
+              <div class="placeholder" style="width: 45px; height: 30px; line-height: 30px; text-align: center;">None</div>
+              <div class="placeholder" style="width: 45px; height: 30px; line-height: 30px; text-align: center; border-color: var(--accent);">Norm</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding: 15px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end;">
+          <button class="mock-button">Add to Order</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup" data-choice="inline" onclick="toggleSelect(this)" style="cursor: pointer; flex: 1;">
+    <div class="mockup-header">Option B: Inline Replacement</div>
+    <div class="mockup-body" style="display: flex; height: 300px; padding: 0;">
+      <div style="width: 80px; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; padding: 10px;">
+        <div class="placeholder" style="height: 40px;">&lt; Back</div>
+      </div>
+      <div style="flex: 1; padding: 15px; display: flex; flex-direction: column;">
+         <h3 style="margin-top: 0;">Classic Milk Tea</h3>
+         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1;">
+            <div>
+              <div class="label">Sugar Level</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                 <div class="placeholder" style="height: 40px;">0%</div>
+                 <div class="placeholder" style="height: 40px; border-color: var(--accent);">100%</div>
+              </div>
+            </div>
+            <div>
+              <div class="label">Toppings</div>
+              <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px;">
+                 <div class="placeholder" style="height: 40px;">+ Boba</div>
+                 <div class="placeholder" style="height: 40px;">+ Lychee Jelly</div>
+              </div>
+            </div>
+         </div>
+      </div>
+      <div style="width: 150px; border-left: 1px solid var(--border); display: flex; flex-direction: column;">
+        <div style="padding: 10px; border-bottom: 1px solid var(--border); font-weight: bold;">Order</div>
+      </div>
+    </div>
+  </div>
+</div>

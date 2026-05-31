@@ -1,0 +1,51 @@
+<h2>Main Screen Layout</h2>
+<p class="subtitle">Which layout pattern works best for the cashier?</p>
+
+<div class="split" style="gap: 20px; align-items: stretch;">
+  <div class="mockup" data-choice="left-nav" onclick="toggleSelect(this)" style="cursor: pointer; flex: 1;">
+    <div class="mockup-header">Option A: Left Navigation</div>
+    <div class="mockup-body" style="display: flex; height: 300px; padding: 0;">
+      <div style="width: 80px; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; padding: 10px;">
+        <div class="placeholder" style="height: 40px;">Cat 1</div>
+        <div class="placeholder" style="height: 40px;">Cat 2</div>
+        <div class="placeholder" style="height: 40px;">Cat 3</div>
+      </div>
+      <div style="flex: 1; padding: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start;">
+        <div class="placeholder" style="height: 60px;">Item</div>
+        <div class="placeholder" style="height: 60px;">Item</div>
+        <div class="placeholder" style="height: 60px;">Item</div>
+        <div class="placeholder" style="height: 60px;">Item</div>
+      </div>
+      <div style="width: 250px; border-left: 1px solid var(--border); display: flex; flex-direction: column;">
+        <div style="padding: 10px; border-bottom: 1px solid var(--border); font-weight: bold;">Current Order</div>
+        <div style="flex: 1; padding: 10px;">(Items)</div>
+        <button class="mock-button" style="margin: 10px;">Pay $0.00</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup" data-choice="top-nav" onclick="toggleSelect(this)" style="cursor: pointer; flex: 1;">
+    <div class="mockup-header">Option B: Top Navigation</div>
+    <div class="mockup-body" style="display: flex; flex-direction: column; height: 300px; padding: 0;">
+      <div style="height: 60px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; padding: 10px; overflow-x: auto;">
+        <div class="placeholder" style="min-width: 100px;">Cat 1</div>
+        <div class="placeholder" style="min-width: 100px;">Cat 2</div>
+        <div class="placeholder" style="min-width: 100px;">Cat 3</div>
+        <div class="placeholder" style="min-width: 100px;">Cat 4</div>
+      </div>
+      <div style="display: flex; flex: 1;">
+        <div style="flex: 1; padding: 10px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-content: start;">
+          <div class="placeholder" style="height: 60px;">Item</div>
+          <div class="placeholder" style="height: 60px;">Item</div>
+          <div class="placeholder" style="height: 60px;">Item</div>
+          <div class="placeholder" style="height: 60px;">Item</div>
+        </div>
+        <div style="width: 250px; border-left: 1px solid var(--border); display: flex; flex-direction: column;">
+          <div style="padding: 10px; border-bottom: 1px solid var(--border); font-weight: bold;">Current Order</div>
+          <div style="flex: 1; padding: 10px;">(Items)</div>
+          <button class="mock-button" style="margin: 10px;">Pay $0.00</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
