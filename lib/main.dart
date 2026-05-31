@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'screens/pos_screen.dart';
+import 'providers/database_provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final container = ProviderContainer();
+  final db = container.read(databaseProvider);
+  await db.seedInitialData();
+
   runApp(
-    const ProviderScope(
-      child: VeebrewApp(),
+    UncontrolledProviderScope(
+      container: container,
+      child: const VeebrewApp(),
     ),
   );
 }
@@ -18,8 +26,8 @@ class VeebrewApp extends StatelessWidget {
     return MaterialApp(
       title: 'Veebrew POS',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        brightness: Brightness.dark,
       ),
       home: const POSScreen(),
     );
