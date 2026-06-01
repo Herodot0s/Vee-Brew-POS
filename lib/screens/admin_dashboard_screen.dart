@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' show Value;
@@ -7,6 +8,7 @@ import '../providers/data_providers.dart';
 import '../providers/database_provider.dart';
 import '../database/drift_database.dart';
 import '../widgets/analytics/analytics_management_view.dart';
+import '../services/menu_sync_service.dart';
 
 class _OrderHistoryView extends ConsumerWidget {
   const _OrderHistoryView({super.key});
@@ -790,6 +792,47 @@ class _PerformanceStatsBar extends ConsumerWidget {
                     }
                   },
                   child: const Text('Sync All Pending'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      final db = ref.read(databaseProvider);
+                      final file = File('vee-brew-menu.md');
+                      if (await file.exists()) {
+                        final content = await file.readAsString();
+                        await MenuSyncService.syncMenuFromMarkdown(db, content);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Menu synchronized successfully'),
+                            ),
+                          );
+                        }
+                      } else {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('vee-brew-menu.md not found'),
+                            ),
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Sync failed: $e')),
+                        );
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: BinanceTheme.primary,
+                  ),
+                  child: const Text(
+                    'Sync Menu',
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ),
               ],
             ),
