@@ -24,6 +24,10 @@ Stream<AnalyticsSummary> analyticsSummary(Ref ref) {
     }
     return AnalyticsSummary(
       totalRevenue: totalRevenue,
+      netSales: totalRevenue * 0.9, // Temporary mock
+      taxCollected: totalRevenue * 0.1, // Temporary mock
+      totalOrders: rows.length, // Temporary mock
+      averageOrderValue: rows.isEmpty ? 0 : totalRevenue / rows.length, // Temporary mock
       totalQuantity: totalQuantity,
     );
   });

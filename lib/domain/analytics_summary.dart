@@ -5,7 +5,7 @@ class AnalyticsSummary {
   final int totalOrders;
   final double averageOrderValue;
   final int totalQuantity;
-  final Map<String, double> topProducts; // Name -> Revenue
+  final Map<String, ({int quantity, double revenue})> topProducts; // Name -> (Quantity, Revenue)
   final Map<String, double> paymentMethods; // Type -> Revenue
   final Map<int, int> peakHours; // Hour (0-23) -> Order Count
 

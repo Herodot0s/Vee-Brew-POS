@@ -10,7 +10,7 @@ void main() {
       totalOrders: 5,
       averageOrderValue: 30.0,
       totalQuantity: 10,
-      topProducts: {'Espresso': 100.0, 'Latte': 50.0},
+      topProducts: {'Espresso': (quantity: 50, revenue: 100.0), 'Latte': (quantity: 20, revenue: 50.0)},
       paymentMethods: {'Cash': 50.0, 'Card': 100.0},
       peakHours: {8: 2, 9: 3},
     );
@@ -19,7 +19,8 @@ void main() {
     expect(summary.taxCollected, 20.0);
     expect(summary.totalOrders, 5);
     expect(summary.averageOrderValue, 30.0);
-    expect(summary.topProducts['Espresso'], 100.0);
+    expect(summary.topProducts['Espresso']?.revenue, 100.0);
+    expect(summary.topProducts['Espresso']?.quantity, 50);
     expect(summary.paymentMethods['Card'], 100.0);
     expect(summary.peakHours[9], 3);
   });

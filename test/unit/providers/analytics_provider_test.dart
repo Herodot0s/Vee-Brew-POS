@@ -24,5 +24,12 @@ AnalyticsSummary calculateAnalytics(List<Map<String, dynamic>> orders) {
     revenue += order['totalAmount'] as double;
     quantity += order['quantity'] as int;
   }
-  return AnalyticsSummary(totalRevenue: revenue, totalQuantity: quantity);
+  return AnalyticsSummary(
+    totalRevenue: revenue,
+    netSales: revenue * 0.9,
+    taxCollected: revenue * 0.1,
+    totalOrders: orders.length,
+    averageOrderValue: orders.isEmpty ? 0 : revenue / orders.length,
+    totalQuantity: quantity,
+  );
 }
