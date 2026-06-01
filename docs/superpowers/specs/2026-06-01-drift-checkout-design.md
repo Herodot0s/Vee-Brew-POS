@@ -51,7 +51,7 @@ The application will transition from using static mock data to an offline-first 
 The checkout process will be handled via a centered modal overlay.
 
 ### Trigger
-Tapping the primary action button (e.g., "Charge" or "Pay") in the `OrderTicket` sidebar.
+Tapping the primary action button (e.g., "Charge" or "Pay") in the `OrderTicket` sidebar.g
 
 ### Modal UI
 *   **Container:** Centered dialog, styled with the dark theme surface color (`#1E2329`) and appropriate border radii.
