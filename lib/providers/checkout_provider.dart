@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import '../database/drift_database.dart';
 import 'database_provider.dart';
 import 'cart_provider.dart';
+import 'admin_provider.dart';
 
 final checkoutServiceProvider = Provider((ref) => CheckoutService(ref));
 
@@ -23,6 +24,7 @@ class CheckoutService {
 
     if (cartItems.isEmpty) return;
 
+    final stopwatch = Stopwatch()..start();
     final now = DateTime.now();
     final datePrefix =
         '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
@@ -45,6 +47,7 @@ class CheckoutService {
               totalAmount: total,
               paymentMethod: paymentMethod,
               createdAt: now,
+              isSynced: const Value(false),
             ),
           );
 
@@ -71,6 +74,9 @@ class CheckoutService {
             );
       }
     });
+
+    stopwatch.stop();
+    _ref.read(checkoutDurationProvider.notifier).addDuration(stopwatch.elapsedMilliseconds);
 
     // Clear cart after successful save
     _ref.read(cartProvider.notifier).clearCart();
