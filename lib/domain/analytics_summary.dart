@@ -1,4 +1,6 @@
-class AnalyticsSummary {
+import 'package:equatable/equatable.dart';
+
+class AnalyticsSummary extends Equatable {
   final double totalRevenue;
   final double netSales;
   final double taxCollected;
@@ -9,7 +11,7 @@ class AnalyticsSummary {
   final Map<String, double> paymentMethods; // Type -> Revenue
   final Map<int, int> peakHours; // Hour (0-23) -> Order Count
 
-  AnalyticsSummary({
+  const AnalyticsSummary({
     required this.totalRevenue,
     required this.netSales,
     required this.taxCollected,
@@ -20,4 +22,17 @@ class AnalyticsSummary {
     this.paymentMethods = const {},
     this.peakHours = const {},
   });
+
+  @override
+  List<Object?> get props => [
+        totalRevenue,
+        netSales,
+        taxCollected,
+        totalOrders,
+        averageOrderValue,
+        totalQuantity,
+        topProducts,
+        paymentMethods,
+        peakHours,
+      ];
 }
