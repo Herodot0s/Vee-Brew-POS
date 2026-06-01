@@ -9,54 +9,41 @@ part of 'analytics_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(AnalyticsState)
-final analyticsStateProvider = AnalyticsStateProvider._();
+@ProviderFor(analyticsSummary)
+final analyticsSummaryProvider = AnalyticsSummaryProvider._();
 
-final class AnalyticsStateProvider
-    extends $NotifierProvider<AnalyticsState, TimeRange> {
-  AnalyticsStateProvider._()
+final class AnalyticsSummaryProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<AnalyticsSummary>,
+          AnalyticsSummary,
+          Stream<AnalyticsSummary>
+        >
+    with $FutureModifier<AnalyticsSummary>, $StreamProvider<AnalyticsSummary> {
+  AnalyticsSummaryProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'analyticsStateProvider',
+        name: r'analyticsSummaryProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$analyticsStateHash();
+  String debugGetCreateSourceHash() => _$analyticsSummaryHash();
 
   @$internal
   @override
-  AnalyticsState create() => AnalyticsState();
+  $StreamProviderElement<AnalyticsSummary> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
 
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(TimeRange value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<TimeRange>(value),
-    );
-  }
-}
-
-String _$analyticsStateHash() => r'b93008357121ed437f0f9919b2f6fdb62e567dfc';
-
-abstract class _$AnalyticsState extends $Notifier<TimeRange> {
-  TimeRange build();
-  @$mustCallSuper
   @override
-  void runBuild() {
-    final ref = this.ref as $Ref<TimeRange, TimeRange>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<TimeRange, TimeRange>,
-              TimeRange,
-              Object?,
-              Object?
-            >;
-    element.handleCreate(ref, build);
+  Stream<AnalyticsSummary> create(Ref ref) {
+    return analyticsSummary(ref);
   }
 }
+
+String _$analyticsSummaryHash() => r'e4c1d80011369c821446d6a9081e6beb38f0ad9f';
