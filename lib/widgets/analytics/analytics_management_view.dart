@@ -1,4 +1,3 @@
-// lib/widgets/analytics/analytics_management_view.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/mock_analytics_provider.dart';
@@ -6,6 +5,7 @@ import '../admin/metric_tile.dart';
 import 'components/top_products_card.dart';
 import 'components/payment_methods_card.dart';
 import 'components/peak_hours_card.dart';
+import 'components/time_range_selector.dart';
 import '../../theme/binance_theme.dart';
 
 class AnalyticsManagementView extends ConsumerWidget {
@@ -29,12 +29,7 @@ class AnalyticsManagementView extends ConsumerWidget {
                   children: [
                     const Text('Time Range: ', style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(width: 8),
-                    // Placeholder for TimeRangeSelector if not fully functional
-                    DropdownButton<String>(
-                      value: 'Today',
-                      items: ['Today', 'This Week', 'This Month'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
-                      onChanged: (_) {},
-                    ),
+                    const TimeRangeSelector(),
                   ],
                 ),
               ),
@@ -61,9 +56,9 @@ class AnalyticsManagementView extends ConsumerWidget {
                     icon: Icons.account_balance_wallet,
                   ),
                   MetricTile(
-                    label: 'Total Orders',
-                    value: summary.totalOrders.toString(),
-                    icon: Icons.receipt_long,
+                    label: 'Tax',
+                    value: '\$${summary.taxCollected.toStringAsFixed(2)}',
+                    icon: Icons.receipt,
                     color: BinanceTheme.primary,
                   ),
                   MetricTile(
