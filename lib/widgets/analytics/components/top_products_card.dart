@@ -1,6 +1,7 @@
 // lib/widgets/analytics/components/top_products_card.dart
 import 'package:flutter/material.dart';
 import '../../admin/bento_card.dart';
+import '../../../theme/binance_theme.dart';
 
 class TopProductsCard extends StatelessWidget {
   final Map<String, ({int quantity, double revenue})> topProducts;
@@ -19,7 +20,7 @@ class TopProductsCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.star, color: Colors.amber, size: 20),
+              Icon(Icons.star, color: Theme.of(context).colorScheme.primary, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Top 5 Products',
@@ -39,12 +40,12 @@ class TopProductsCard extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('${index + 1}. ${entry.key}', style: const TextStyle(fontWeight: FontWeight.w500)),
+                      Text('${index + 1}. ${entry.key}', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
                       Row(
                         children: [
-                          Text('${entry.value.quantity}x', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                          Text('${entry.value.quantity}x', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: BinanceTheme.muted, fontSize: 12)),
                           const SizedBox(width: 8),
-                          Text('\$${entry.value.revenue.toStringAsFixed(2)}', style: const TextStyle(color: Colors.green)),
+                          Text('\$${entry.value.revenue.toStringAsFixed(2)}', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: BinanceTheme.tradingUp)),
                         ],
                       ),
                     ],

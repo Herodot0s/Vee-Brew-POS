@@ -1,6 +1,7 @@
 // lib/widgets/analytics/components/payment_methods_card.dart
 import 'package:flutter/material.dart';
 import '../../admin/bento_card.dart';
+import '../../../theme/binance_theme.dart';
 
 class PaymentMethodsCard extends StatelessWidget {
   final Map<String, double> paymentMethods;
@@ -15,7 +16,7 @@ class PaymentMethodsCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.payments, color: Colors.blue, size: 20),
+              Icon(Icons.payments, color: Theme.of(context).colorScheme.primary, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Revenue by Payment Type',
@@ -25,19 +26,22 @@ class PaymentMethodsCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: ListView(
-              children: paymentMethods.entries.map((entry) {
+            child: ListView.separated(
+              itemCount: paymentMethods.length,
+              separatorBuilder: (context, index) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final entry = paymentMethods.entries.elementAt(index);
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(entry.key),
-                      Text('\$${entry.value.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(entry.key, style: Theme.of(context).textTheme.bodyMedium),
+                      Text('\$${entry.value.toStringAsFixed(2)}', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold, color: BinanceTheme.tradingUp)),
                     ],
                   ),
                 );
-              }).toList(),
+              },
             ),
           ),
         ],
