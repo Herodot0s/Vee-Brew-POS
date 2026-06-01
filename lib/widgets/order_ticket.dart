@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/cart_provider.dart';
+import '../providers/checkout_provider.dart';
 import '../theme/binance_theme.dart';
+import 'checkout_modal.dart';
 
 class OrderTicket extends ConsumerWidget {
   const OrderTicket({super.key});
@@ -91,7 +93,12 @@ class OrderTicket extends ConsumerWidget {
                       ),
                       elevation: 0,
                     ),
-                    onPressed: cart.isNotEmpty ? () {} : null,
+                    onPressed: cart.isNotEmpty
+                        ? () => showDialog(
+                              context: context,
+                              builder: (context) => const CheckoutModal(),
+                            )
+                        : null,
                     child: Text(
                       'Pay Now',
                       style: BinanceTheme.titleStyle(

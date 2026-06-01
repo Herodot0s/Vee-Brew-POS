@@ -58,6 +58,7 @@ class OrderItems extends Table {
 @DriftDatabase(tables: [Categories, Products, Modifiers, Orders, OrderItems])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
+  AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
   int get schemaVersion => 1;
