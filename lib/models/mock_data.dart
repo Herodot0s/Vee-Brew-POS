@@ -154,18 +154,12 @@ List<ModifierGroup> getModifierGroupsForProduct(Product product) {
 }
 
 const List<ModifierOption> mockAddOns = [
-  ModifierOption(id: 'add_pearls', groupId: 'addons', name: 'Pearls', priceDelta: 10.0),
-  ModifierOption(id: 'add_cheesecake', groupId: 'addons', name: 'Cheesecake', priceDelta: 15.0),
+  ModifierOption(id: 'add_pearl', groupId: 'addons', name: 'Pearl', priceDelta: 10.0),
+  ModifierOption(id: 'add_nata', groupId: 'addons', name: 'Nata', priceDelta: 15.0),
+  ModifierOption(id: 'add_coffee_jelly', groupId: 'addons', name: 'Coffee Jelly', priceDelta: 15.0),
   ModifierOption(id: 'add_cream_cheese', groupId: 'addons', name: 'Cream Cheese', priceDelta: 15.0),
-  ModifierOption(id: 'add_nata', groupId: 'addons', name: 'Nata de Coco', priceDelta: 15.0),
-  ModifierOption(id: 'add_scoop', groupId: 'addons', name: 'Extra Scoop (Flavor)', priceDelta: 15.0),
-  ModifierOption(id: 'add_choco', groupId: 'addons', name: 'Choco Syrup', priceDelta: 15.0),
-  ModifierOption(id: 'add_caramel', groupId: 'addons', name: 'Caramel Syrup', priceDelta: 15.0),
-  ModifierOption(id: 'add_strawberry', groupId: 'addons', name: 'Strawberry Syrup', priceDelta: 15.0),
+  ModifierOption(id: 'add_oreo', groupId: 'addons', name: 'Crushed Oreo', priceDelta: 15.0),
   ModifierOption(id: 'add_graham', groupId: 'addons', name: 'Crushed Graham', priceDelta: 15.0),
-  ModifierOption(id: 'add_shot', groupId: 'addons', name: 'Extra Shot (Coffee)', priceDelta: 20.0),
+  ModifierOption(id: 'add_foam', groupId: 'addons', name: 'Classic Foam', priceDelta: 15.0),
   ModifierOption(id: 'add_pudding', groupId: 'addons', name: 'Egg Pudding', priceDelta: 15.0),
-  ModifierOption(id: 'add_boba', groupId: 'addons', name: 'Popping Boba', priceDelta: 15.0),
-  ModifierOption(id: 'add_oreo', groupId: 'addons', name: 'Oreo Crushed', priceDelta: 15.0),
-  ModifierOption(id: 'add_foam', groupId: 'addons', name: 'Milk Foam', priceDelta: 15.0),
 ];
