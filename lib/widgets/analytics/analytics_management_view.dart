@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../analytics/revenue_card.dart';
-import '../analytics/top_products_list.dart';
+import '../../providers/analytics_provider.dart';
+import '../admin/bento_card.dart';
 import 'components/time_range_selector.dart';
 
 class AnalyticsManagementView extends ConsumerWidget {
@@ -9,25 +9,54 @@ class AnalyticsManagementView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Placeholder analytics data for now, integration with provider will follow
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          const TimeRangeSelector(),
-          const SizedBox(height: 16),
-          const RevenueCard(revenue: 12500.50),
-          const SizedBox(height: 16),
-          Expanded(
-            child: TopProductsList(
-              products: [
-                ProductStat(name: 'Espresso', quantity: 45),
-                ProductStat(name: 'Latte', quantity: 32),
-                ProductStat(name: 'Croissant', quantity: 28),
-              ],
+    final summaryAsync = ref.watch(analyticsSummaryProvider);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Analytics')),
+      body: summaryAsync.when(
+        data: (summary) => CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.all(16),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 1.5,
+                ),
+                delegate: SliverChildListDelegate([
+                  BentoCard(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Revenue',
+                            style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 8),
+                        Text('\$${summary.totalRevenue.toStringAsFixed(2)}',
+                            style: Theme.of(context).textTheme.headlineLarge),
+                      ],
+                    ),
+                  ),
+                  BentoCard(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Items Sold',
+                            style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 8),
+                        Text('${summary.totalQuantity}',
+                            style: Theme.of(context).textTheme.headlineMedium),
+                      ],
+                    ),
+                  ),
+                ]),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
       ),
     );
   }
