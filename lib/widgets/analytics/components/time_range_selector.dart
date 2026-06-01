@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../theme/binance_theme.dart';
-import '../../../providers/data_providers.dart';
-import '../../../providers/analytics_provider.dart';
+import '../../../providers/analytics_state_provider.dart';
 
 class TimeRangeSelector extends ConsumerWidget {
   const TimeRangeSelector({super.key});
