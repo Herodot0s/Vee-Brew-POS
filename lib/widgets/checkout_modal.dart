@@ -64,9 +64,7 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
 
     return Dialog(
       backgroundColor: BinanceTheme.surfaceCardDark,
-      shape: RoundedRectangleBorder(
-        borderRadius: BinanceTheme.roundedXl,
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BinanceTheme.roundedXl),
       child: Container(
         width: 420,
         padding: const EdgeInsets.all(BinanceTheme.spaceXl),
@@ -87,9 +85,7 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
                 ),
                 Text(
                   '${cart.length} item${cart.length == 1 ? '' : 's'}',
-                  style: BinanceTheme.titleStyle(
-                    color: BinanceTheme.muted,
-                  ),
+                  style: BinanceTheme.titleStyle(color: BinanceTheme.muted),
                 ),
               ],
             ),
@@ -97,19 +93,14 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
             const SizedBox(height: BinanceTheme.spaceLg),
 
             // Divider
-            Container(
-              height: 1,
-              color: BinanceTheme.surfaceElevatedDark,
-            ),
+            Container(height: 1, color: BinanceTheme.surfaceElevatedDark),
 
             const SizedBox(height: BinanceTheme.spaceLg),
 
             // Amount
             Text(
               'Amount Due',
-              style: BinanceTheme.titleStyle(
-                color: BinanceTheme.muted,
-              ),
+              style: BinanceTheme.titleStyle(color: BinanceTheme.muted),
             ),
             const SizedBox(height: BinanceTheme.spaceXs),
             Text(
@@ -126,12 +117,8 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
             // Payment buttons or spinner
             if (_isProcessing)
               const Padding(
-                padding: EdgeInsets.symmetric(
-                  vertical: BinanceTheme.spaceLg,
-                ),
-                child: CircularProgressIndicator(
-                  color: BinanceTheme.primary,
-                ),
+                padding: EdgeInsets.symmetric(vertical: BinanceTheme.spaceLg),
+                child: CircularProgressIndicator(color: BinanceTheme.primary),
               )
             else
               Row(
@@ -160,15 +147,12 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
             SizedBox(
               width: double.infinity,
               child: TextButton(
-                onPressed:
-                    _isProcessing
-                        ? null
-                        : () => Navigator.of(context).pop(),
+                onPressed: _isProcessing
+                    ? null
+                    : () => Navigator.of(context).pop(),
                 child: Text(
                   'Cancel',
-                  style: BinanceTheme.titleStyle(
-                    color: BinanceTheme.muted,
-                  ),
+                  style: BinanceTheme.titleStyle(color: BinanceTheme.muted),
                 ),
               ),
             ),
@@ -206,19 +190,15 @@ class _PaymentButtonState extends State<_PaymentButton> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(
-            vertical: BinanceTheme.spaceLg,
-          ),
+          padding: const EdgeInsets.symmetric(vertical: BinanceTheme.spaceLg),
           decoration: BoxDecoration(
-            color:
-                _hovering
-                    ? BinanceTheme.surfaceElevatedDark
-                    : Colors.transparent,
+            color: _hovering
+                ? BinanceTheme.surfaceElevatedDark
+                : Colors.transparent,
             border: Border.all(
-              color:
-                  _hovering
-                      ? BinanceTheme.primary.withValues(alpha: 0.4)
-                      : BinanceTheme.surfaceElevatedDark,
+              color: _hovering
+                  ? BinanceTheme.primary.withValues(alpha: 0.4)
+                  : BinanceTheme.surfaceElevatedDark,
             ),
             borderRadius: BinanceTheme.roundedLg,
           ),

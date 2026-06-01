@@ -11,10 +11,7 @@ void main() async {
   await db.seedInitialData();
 
   runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const VeebrewApp(),
-    ),
+    UncontrolledProviderScope(container: container, child: const VeebrewApp()),
   );
 }
 
@@ -25,10 +22,7 @@ class VeebrewApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Veebrew POS',
-      theme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-      ),
+      theme: ThemeData(useMaterial3: true, brightness: Brightness.dark),
       home: const POSScreen(),
     );
   }

@@ -10,10 +10,8 @@ class CategorySidebar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedCategory =
-        ref.watch(selectedCategoryProvider);
-    final categoriesAsync =
-        ref.watch(categoriesStreamProvider);
+    final selectedCategory = ref.watch(selectedCategoryProvider);
+    final categoriesAsync = ref.watch(categoriesStreamProvider);
 
     return Container(
       color: BinanceTheme.canvasDark,
@@ -41,39 +39,31 @@ class CategorySidebar extends ConsumerWidget {
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
                   final cat = categories[index];
-                  final isSelected =
-                      selectedCategory == cat.id;
+                  final isSelected = selectedCategory == cat.id;
 
                   return GestureDetector(
                     onTap: () {
                       ref
-                          .read(selectedCategoryProvider
-                              .notifier)
+                          .read(selectedCategoryProvider.notifier)
                           .setCategory(cat.id);
                       ref.read(isAdminModeProvider.notifier).value = false;
                     },
                     child: AnimatedContainer(
-                      duration: const Duration(
-                          milliseconds: 150),
-                      margin:
-                          const EdgeInsets.symmetric(
-                        vertical:
-                            BinanceTheme.spaceXxs,
-                        horizontal:
-                            BinanceTheme.spaceXs,
+                      duration: const Duration(milliseconds: 150),
+                      margin: const EdgeInsets.symmetric(
+                        vertical: BinanceTheme.spaceXxs,
+                        horizontal: BinanceTheme.spaceXs,
                       ),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? BinanceTheme
-                                .surfaceCardDark
+                            ? BinanceTheme.surfaceCardDark
                             : Colors.transparent,
-                        borderRadius:
-                            BinanceTheme.roundedLg,
+                        borderRadius: BinanceTheme.roundedLg,
                         border: isSelected
                             ? Border.all(
-                                color: BinanceTheme
-                                    .surfaceElevatedDark,
-                                width: 1)
+                                color: BinanceTheme.surfaceElevatedDark,
+                                width: 1,
+                              )
                             : null,
                       ),
                       child: Stack(
@@ -85,59 +75,38 @@ class CategorySidebar extends ConsumerWidget {
                               bottom: 12,
                               width: 3,
                               child: Container(
-                                decoration:
-                                    BoxDecoration(
-                                  color: BinanceTheme
-                                      .primary,
-                                  borderRadius:
-                                      BorderRadius
-                                          .circular(
-                                              1.5),
+                                decoration: BoxDecoration(
+                                  color: BinanceTheme.primary,
+                                  borderRadius: BorderRadius.circular(1.5),
                                 ),
                               ),
                             ),
                           Padding(
-                            padding:
-                                const EdgeInsets
-                                    .symmetric(
-                              vertical:
-                                  BinanceTheme
-                                      .spaceMd,
-                              horizontal:
-                                  BinanceTheme
-                                      .spaceLg,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: BinanceTheme.spaceMd,
+                              horizontal: BinanceTheme.spaceLg,
                             ),
                             child: Row(
                               children: [
                                 Icon(
                                   Icons.local_drink,
                                   color: isSelected
-                                      ? BinanceTheme
-                                          .onDark
-                                      : BinanceTheme
-                                          .muted,
+                                      ? BinanceTheme.onDark
+                                      : BinanceTheme.muted,
                                   size: 20,
                                 ),
-                                const SizedBox(
-                                    width:
-                                        BinanceTheme
-                                            .spaceSm),
+                                const SizedBox(width: BinanceTheme.spaceSm),
                                 Expanded(
                                   child: Text(
                                     cat.name,
-                                    style: BinanceTheme
-                                        .titleStyle(
+                                    style: BinanceTheme.titleStyle(
                                       size: 14,
                                       weight: isSelected
-                                          ? FontWeight
-                                              .w600
-                                          : FontWeight
-                                              .w400,
+                                          ? FontWeight.w600
+                                          : FontWeight.w400,
                                       color: isSelected
-                                          ? BinanceTheme
-                                              .onDark
-                                          : BinanceTheme
-                                              .muted,
+                                          ? BinanceTheme.onDark
+                                          : BinanceTheme.muted,
                                     ),
                                   ),
                                 ),
@@ -150,33 +119,34 @@ class CategorySidebar extends ConsumerWidget {
                   );
                 },
               ),
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(
                 child: Text(
                   'Error: $error',
-                  style: TextStyle(
-                      color: BinanceTheme.muted),
+                  style: TextStyle(color: BinanceTheme.muted),
                 ),
               ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(BinanceTheme.spaceMd),
-            child: Consumer(builder: (context, ref, _) {
-              final isAdminMode = ref.watch(isAdminModeProvider);
-              return ElevatedButton(
-                onPressed: () {
-                  ref.read(isAdminModeProvider.notifier).value = !isAdminMode;
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isAdminMode ? BinanceTheme.primary : BinanceTheme.surfaceElevatedDark,
-                  foregroundColor: BinanceTheme.onDark,
-                ),
-                child: Text(isAdminMode ? 'POS Terminal' : 'Admin Area'),
-              );
-            }),
+            child: Consumer(
+              builder: (context, ref, _) {
+                final isAdminMode = ref.watch(isAdminModeProvider);
+                return ElevatedButton(
+                  onPressed: () {
+                    ref.read(isAdminModeProvider.notifier).value = !isAdminMode;
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isAdminMode
+                        ? BinanceTheme.primary
+                        : BinanceTheme.surfaceElevatedDark,
+                    foregroundColor: BinanceTheme.onDark,
+                  ),
+                  child: Text(isAdminMode ? 'POS Terminal' : 'Admin Area'),
+                );
+              },
+            ),
           ),
         ],
       ),

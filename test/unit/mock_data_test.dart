@@ -6,7 +6,9 @@ void main() {
     expect(mockCategories.length, 10);
     expect(mockProducts.length, 50);
 
-    final milkTeas = mockProducts.where((p) => p.categoryId == 'milk_tea').toList();
+    final milkTeas = mockProducts
+        .where((p) => p.categoryId == 'milk_tea')
+        .toList();
     expect(milkTeas.length, 8);
 
     final fries = mockProducts.firstWhere((p) => p.id == 'fr_bbq');

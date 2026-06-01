@@ -9,14 +9,14 @@ import 'package:veebrew/widgets/order_ticket.dart';
 import 'package:veebrew/widgets/checkout_modal.dart';
 
 void main() {
-  testWidgets('CheckoutModal processes payment and clears cart', (tester) async {
+  testWidgets('CheckoutModal processes payment and clears cart', (
+    tester,
+  ) async {
     final db = AppDatabase.memory();
     await db.seedInitialData();
 
     final container = ProviderContainer(
-      overrides: [
-        databaseProvider.overrideWithValue(db),
-      ],
+      overrides: [databaseProvider.overrideWithValue(db)],
     );
 
     // Seed product to cart
@@ -31,11 +31,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(
-          home: Scaffold(
-            body: OrderTicket(),
-          ),
-        ),
+        child: const MaterialApp(home: Scaffold(body: OrderTicket())),
       ),
     );
 

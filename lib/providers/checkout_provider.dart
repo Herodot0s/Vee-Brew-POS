@@ -32,16 +32,16 @@ class CheckoutService {
     await db.transaction(() async {
       // Daily sequence number
       final todayStart = DateTime(now.year, now.month, now.day);
-      final todayOrders = await (db.select(db.orders)
-            ..where(
-                (t) => t.createdAt.isBiggerOrEqualValue(todayStart)))
-          .get();
-      final seqNum =
-          (todayOrders.length + 1).toString().padLeft(3, '0');
+      final todayOrders = await (db.select(
+        db.orders,
+      )..where((t) => t.createdAt.isBiggerOrEqualValue(todayStart))).get();
+      final seqNum = (todayOrders.length + 1).toString().padLeft(3, '0');
       final orderNumber = '$datePrefix-$seqNum';
 
       // Insert order
-      final orderId = await db.into(db.orders).insert(
+      final orderId = await db
+          .into(db.orders)
+          .insert(
             OrdersCompanion.insert(
               orderNumber: orderNumber,
               totalAmount: total,
@@ -55,15 +55,15 @@ class CheckoutService {
       for (final item in cartItems) {
         final modsJson = jsonEncode(
           item.selectedModifiers
-              .map((m) => {
-                    'id': m.id,
-                    'name': m.name,
-                    'priceDelta': m.priceDelta,
-                  })
+              .map(
+                (m) => {'id': m.id, 'name': m.name, 'priceDelta': m.priceDelta},
+              )
               .toList(),
         );
 
-        await db.into(db.orderItems).insert(
+        await db
+            .into(db.orderItems)
+            .insert(
               OrderItemsCompanion.insert(
                 orderId: orderId,
                 productId: item.product.id,
@@ -76,7 +76,9 @@ class CheckoutService {
     });
 
     stopwatch.stop();
-    _ref.read(checkoutDurationProvider.notifier).addDuration(stopwatch.elapsedMilliseconds);
+    _ref
+        .read(checkoutDurationProvider.notifier)
+        .addDuration(stopwatch.elapsedMilliseconds);
 
     // Clear cart after successful save
     _ref.read(cartProvider.notifier).clearCart();

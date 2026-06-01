@@ -5,10 +5,7 @@ class OrderItem {
   final Product product;
   final List<ModifierOption> selectedModifiers;
 
-  const OrderItem({
-    required this.product,
-    required this.selectedModifiers,
-  });
+  const OrderItem({required this.product, required this.selectedModifiers});
 
   double get calculatedPrice {
     double total = product.basePrice;

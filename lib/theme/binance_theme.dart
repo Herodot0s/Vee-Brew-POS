@@ -31,15 +31,19 @@ class BinanceTheme {
   static const double spaceLg = 24.0;
   static const double spaceXl = 32.0;
 
-  static TextStyle titleStyle({double size = 14, FontWeight weight = FontWeight.w600, Color color = body}) {
-    return GoogleFonts.inter(
-      fontSize: size,
-      fontWeight: weight,
-      color: color,
-    );
+  static TextStyle titleStyle({
+    double size = 14,
+    FontWeight weight = FontWeight.w600,
+    Color color = body,
+  }) {
+    return GoogleFonts.inter(fontSize: size, fontWeight: weight, color: color);
   }
 
-  static TextStyle numberStyle({double size = 14, FontWeight weight = FontWeight.w500, Color color = primary}) {
+  static TextStyle numberStyle({
+    double size = 14,
+    FontWeight weight = FontWeight.w500,
+    Color color = primary,
+  }) {
     return GoogleFonts.jetBrainsMono(
       fontSize: size,
       fontWeight: weight,

@@ -12,14 +12,8 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          databaseProvider.overrideWithValue(db),
-        ],
-        child: const MaterialApp(
-          home: Scaffold(
-            body: ProductGrid(),
-          ),
-        ),
+        overrides: [databaseProvider.overrideWithValue(db)],
+        child: const MaterialApp(home: Scaffold(body: ProductGrid())),
       ),
     );
 

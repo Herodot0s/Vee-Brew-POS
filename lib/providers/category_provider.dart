@@ -9,6 +9,7 @@ class SelectedCategoryNotifier extends Notifier<String> {
   }
 }
 
-final selectedCategoryProvider = NotifierProvider<SelectedCategoryNotifier, String>(() {
-  return SelectedCategoryNotifier();
-});
+final selectedCategoryProvider =
+    NotifierProvider<SelectedCategoryNotifier, String>(() {
+      return SelectedCategoryNotifier();
+    });

@@ -35,7 +35,9 @@ class OrderTicket extends ConsumerWidget {
               ),
               itemBuilder: (context, index) {
                 final item = cart[index];
-                final modsText = item.selectedModifiers.map((m) => m.name).join(', ');
+                final modsText = item.selectedModifiers
+                    .map((m) => m.name)
+                    .join(', ');
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: BinanceTheme.spaceLg,
@@ -43,17 +45,26 @@ class OrderTicket extends ConsumerWidget {
                   ),
                   title: Text(
                     item.product.name,
-                    style: BinanceTheme.titleStyle(size: 14, color: BinanceTheme.body),
+                    style: BinanceTheme.titleStyle(
+                      size: 14,
+                      color: BinanceTheme.body,
+                    ),
                   ),
                   subtitle: modsText.isNotEmpty
                       ? Text(
                           modsText,
-                          style: BinanceTheme.titleStyle(size: 12, color: BinanceTheme.muted),
+                          style: BinanceTheme.titleStyle(
+                            size: 12,
+                            color: BinanceTheme.muted,
+                          ),
                         )
                       : null,
                   trailing: Text(
                     '₱${item.calculatedPrice.toStringAsFixed(2)}',
-                    style: BinanceTheme.numberStyle(size: 14, color: BinanceTheme.body),
+                    style: BinanceTheme.numberStyle(
+                      size: 14,
+                      color: BinanceTheme.body,
+                    ),
                   ),
                 );
               },
@@ -72,11 +83,19 @@ class OrderTicket extends ConsumerWidget {
                   children: [
                     Text(
                       'Total:',
-                      style: BinanceTheme.titleStyle(size: 16, weight: FontWeight.bold, color: BinanceTheme.muted),
+                      style: BinanceTheme.titleStyle(
+                        size: 16,
+                        weight: FontWeight.bold,
+                        color: BinanceTheme.muted,
+                      ),
                     ),
                     Text(
                       '₱${cartNotifier.total.toStringAsFixed(2)}',
-                      style: BinanceTheme.numberStyle(size: 18, weight: FontWeight.bold, color: BinanceTheme.primary),
+                      style: BinanceTheme.numberStyle(
+                        size: 18,
+                        weight: FontWeight.bold,
+                        color: BinanceTheme.primary,
+                      ),
                     ),
                   ],
                 ),
@@ -95,9 +114,9 @@ class OrderTicket extends ConsumerWidget {
                     ),
                     onPressed: cart.isNotEmpty
                         ? () => showDialog(
-                              context: context,
-                              builder: (context) => const CheckoutModal(),
-                            )
+                            context: context,
+                            builder: (context) => const CheckoutModal(),
+                          )
                         : null,
                     child: Text(
                       'Pay Now',
@@ -111,7 +130,7 @@ class OrderTicket extends ConsumerWidget {
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

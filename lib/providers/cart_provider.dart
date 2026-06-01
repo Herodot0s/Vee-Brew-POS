@@ -10,7 +10,10 @@ class CartNotifier extends Notifier<List<OrderItem>> {
   }
 
   void addQuickTap(Product product) {
-    state = [...state, OrderItem(product: product, selectedModifiers: const <ModifierOption>[])];
+    state = [
+      ...state,
+      OrderItem(product: product, selectedModifiers: const <ModifierOption>[]),
+    ];
   }
 
   void addConfiguredItem(OrderItem item) {

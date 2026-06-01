@@ -66,41 +66,39 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) async {
-          await m.createAll();
-        },
-        onUpgrade: (m, from, to) async {
-          if (from < 2) {
-            await m.addColumn(orders, orders.isSynced);
-          }
-        },
-      );
+    onCreate: (m) async {
+      await m.createAll();
+    },
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.addColumn(orders, orders.isSynced);
+      }
+    },
+  );
 
   Future<void> seedInitialData() async {
-    final count = await (select(categories)
-          ..limit(1))
-        .get();
+    final count = await (select(categories)..limit(1)).get();
     if (count.isNotEmpty) return;
 
     await transaction(() async {
       // Seed categories
       for (var i = 0; i < mockCategories.length; i++) {
         final cat = mockCategories[i];
-        await into(categories).insert(CategoriesCompanion.insert(
-          id: cat.id,
-          name: cat.name,
-          sortOrder: i,
-        ));
+        await into(categories).insert(
+          CategoriesCompanion.insert(id: cat.id, name: cat.name, sortOrder: i),
+        );
       }
 
       // Seed products
       for (final prod in mockProducts) {
-        await into(products).insert(ProductsCompanion.insert(
-          id: prod.id,
-          name: prod.name,
-          basePrice: prod.basePrice,
-          categoryId: prod.categoryId,
-        ));
+        await into(products).insert(
+          ProductsCompanion.insert(
+            id: prod.id,
+            name: prod.name,
+            basePrice: prod.basePrice,
+            categoryId: prod.categoryId,
+          ),
+        );
 
         // Seed modifiers for this product
         final groups = getModifierGroupsForProduct(prod);

@@ -6,7 +6,9 @@ import 'database_provider.dart';
 
 enum AdminTab { orders, categories, products, modifiers }
 
-final adminViewActiveProvider = NotifierProvider<AdminViewNotifier, bool>(() => AdminViewNotifier());
+final adminViewActiveProvider = NotifierProvider<AdminViewNotifier, bool>(
+  () => AdminViewNotifier(),
+);
 
 class AdminViewNotifier extends Notifier<bool> {
   @override
@@ -14,7 +16,9 @@ class AdminViewNotifier extends Notifier<bool> {
   set value(bool v) => state = v;
 }
 
-final adminTabProvider = NotifierProvider<AdminTabNotifier, AdminTab>(() => AdminTabNotifier());
+final adminTabProvider = NotifierProvider<AdminTabNotifier, AdminTab>(
+  () => AdminTabNotifier(),
+);
 
 class AdminTabNotifier extends Notifier<AdminTab> {
   @override
@@ -22,7 +26,9 @@ class AdminTabNotifier extends Notifier<AdminTab> {
   set value(AdminTab v) => state = v;
 }
 
-final isAdminModeProvider = NotifierProvider<AdminModeNotifier, bool>(() => AdminModeNotifier());
+final isAdminModeProvider = NotifierProvider<AdminModeNotifier, bool>(
+  () => AdminModeNotifier(),
+);
 
 class AdminModeNotifier extends Notifier<bool> {
   @override
@@ -31,7 +37,10 @@ class AdminModeNotifier extends Notifier<bool> {
 }
 
 // Performance latency tracking
-final checkoutDurationProvider = NotifierProvider<CheckoutDurationNotifier, List<int>>(() => CheckoutDurationNotifier());
+final checkoutDurationProvider =
+    NotifierProvider<CheckoutDurationNotifier, List<int>>(
+      () => CheckoutDurationNotifier(),
+    );
 
 class CheckoutDurationNotifier extends Notifier<List<int>> {
   @override
@@ -45,13 +54,19 @@ class CheckoutDurationNotifier extends Notifier<List<int>> {
 // Orders stream provider
 final ordersStreamProvider = StreamProvider<List<Order>>((ref) {
   final db = ref.watch(databaseProvider);
-  return (db.select(db.orders)
-        ..orderBy([(t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)]))
+  return (db.select(db.orders)..orderBy([
+        (t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc),
+      ]))
       .watch();
 });
 
 // Order items stream provider for an order id
-final orderItemsProvider = FutureProvider.family<List<OrderItem>, int>((ref, orderId) {
+final orderItemsProvider = FutureProvider.family<List<OrderItem>, int>((
+  ref,
+  orderId,
+) {
   final db = ref.read(databaseProvider);
-  return (db.select(db.orderItems)..where((t) => t.orderId.equals(orderId))).get();
+  return (db.select(
+    db.orderItems,
+  )..where((t) => t.orderId.equals(orderId))).get();
 });

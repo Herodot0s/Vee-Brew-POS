@@ -79,13 +79,16 @@ class _ModifierBottomSheetState extends State<ModifierBottomSheet> {
               Expanded(
                 child: Text(
                   widget.product.name,
-                  style: BinanceTheme.titleStyle(size: 18, weight: FontWeight.bold),
+                  style: BinanceTheme.titleStyle(
+                    size: 18,
+                    weight: FontWeight.bold,
+                  ),
                 ),
               ),
               IconButton(
                 icon: const Icon(Icons.close, color: BinanceTheme.muted),
                 onPressed: () => Navigator.pop(context),
-              )
+              ),
             ],
           ),
           const SizedBox(height: BinanceTheme.spaceMd),
@@ -108,7 +111,8 @@ class _ModifierBottomSheetState extends State<ModifierBottomSheet> {
                     spacing: BinanceTheme.spaceXs,
                     runSpacing: BinanceTheme.spaceXs,
                     children: group.options.map((opt) {
-                      final isSelected = _selectedModifiers[group.id]?.id == opt.id;
+                      final isSelected =
+                          _selectedModifiers[group.id]?.id == opt.id;
                       return ChoiceChip(
                         label: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -117,8 +121,12 @@ class _ModifierBottomSheetState extends State<ModifierBottomSheet> {
                               opt.name,
                               style: BinanceTheme.titleStyle(
                                 size: 13,
-                                color: isSelected ? BinanceTheme.onPrimary : BinanceTheme.body,
-                                weight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                color: isSelected
+                                    ? BinanceTheme.onPrimary
+                                    : BinanceTheme.body,
+                                weight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
                               ),
                             ),
                             if (opt.priceDelta > 0) ...[
@@ -127,10 +135,12 @@ class _ModifierBottomSheetState extends State<ModifierBottomSheet> {
                                 '(+₱${opt.priceDelta.toStringAsFixed(0)})',
                                 style: BinanceTheme.numberStyle(
                                   size: 12,
-                                  color: isSelected ? BinanceTheme.onPrimary : BinanceTheme.primary,
+                                  color: isSelected
+                                      ? BinanceTheme.onPrimary
+                                      : BinanceTheme.primary,
                                 ),
                               ),
-                            ]
+                            ],
                           ],
                         ),
                         selected: isSelected,
@@ -139,7 +149,9 @@ class _ModifierBottomSheetState extends State<ModifierBottomSheet> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BinanceTheme.roundedMd,
                           side: BorderSide(
-                            color: isSelected ? BinanceTheme.primary : BinanceTheme.surfaceElevatedDark,
+                            color: isSelected
+                                ? BinanceTheme.primary
+                                : BinanceTheme.surfaceElevatedDark,
                             width: 1,
                           ),
                         ),
