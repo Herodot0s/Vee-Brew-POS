@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/admin_provider.dart';
 import '../providers/data_providers.dart';
 import '../providers/category_provider.dart';
 import '../theme/binance_theme.dart';
@@ -49,6 +50,7 @@ class CategorySidebar extends ConsumerWidget {
                           .read(selectedCategoryProvider
                               .notifier)
                           .setCategory(cat.id);
+                      ref.read(isAdminModeProvider.notifier).value = false;
                     },
                     child: AnimatedContainer(
                       duration: const Duration(
@@ -159,6 +161,22 @@ class CategorySidebar extends ConsumerWidget {
                 ),
               ),
             ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(BinanceTheme.spaceMd),
+            child: Consumer(builder: (context, ref, _) {
+              final isAdminMode = ref.watch(isAdminModeProvider);
+              return ElevatedButton(
+                onPressed: () {
+                  ref.read(isAdminModeProvider.notifier).value = !isAdminMode;
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isAdminMode ? BinanceTheme.primary : BinanceTheme.surfaceElevatedDark,
+                  foregroundColor: BinanceTheme.onDark,
+                ),
+                child: Text(isAdminMode ? 'POS Terminal' : 'Admin Area'),
+              );
+            }),
           ),
         ],
       ),

@@ -14,13 +14,36 @@ final categoriesStreamProvider =
       .watch();
 });
 
+final searchQueryProvider =
+    NotifierProvider<SearchQueryNotifier, String>(
+        () => SearchQueryNotifier());
+
+class SearchQueryNotifier extends Notifier<String> {
+  @override
+  String build() => '';
+
+  void setQuery(String query) {
+    state = query;
+  }
+
+  void clear() {
+    state = '';
+  }
+}
+
 final productsStreamProvider =
     StreamProvider<List<Product>>((ref) {
   final db = ref.watch(databaseProvider);
   final selectedCategory =
       ref.watch(selectedCategoryProvider);
+  final query =
+      ref.watch(searchQueryProvider).trim().toLowerCase();
   return (db.select(db.products)
-        ..where(
-            (t) => t.categoryId.equals(selectedCategory)))
+        ..where((t) {
+          if (query.isNotEmpty) {
+            return t.name.like('%$query%');
+          }
+          return t.categoryId.equals(selectedCategory);
+        }))
       .watch();
 });
