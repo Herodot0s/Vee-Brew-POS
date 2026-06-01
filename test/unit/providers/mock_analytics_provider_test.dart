@@ -5,6 +5,7 @@ import 'package:veebrew/providers/mock_analytics_provider.dart';
 void main() {
   test('mockAnalyticsProvider returns populated AnalyticsSummary', () async {
     final container = ProviderContainer();
+    addTearDown(container.dispose);
     final summary = await container.read(mockAnalyticsProvider.future);
     
     expect(summary.totalRevenue, greaterThan(0));
