@@ -1,17 +1,24 @@
-# veebrew
+# VeeBrew POS
 
-A new Flutter project.
+VeeBrew POS is a Flutter-based Point of Sale system designed for coffee shops and retail outlets. It integrates with Drift local storage for offline-first capabilities and provides a comprehensive Admin Dashboard for inventory and order management.
+
+## Key Features
+
+- **POS Terminal**: Intuitive interface for quick order processing.
+- **Admin Dashboard**: Real-time sales monitoring, order history tracking, and inventory management.
+- **Offline Sync**: Drift-based database ensures all transactions are logged and synced once connection is restored.
+- **Admin Controls**: Manage categories, products, and modifiers.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+1. Ensure Flutter is installed.
+2. Run `flutter pub get` to fetch dependencies.
+3. Use `dart run build_runner build` to generate necessary Drift database code.
+4. Launch on your target platform: `flutter run`.
 
-A few resources to get you started if this is your first Flutter project:
+## Tech Stack
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **Flutter**: UI Framework
+- **Riverpod**: State Management
+- **Drift**: Local SQLite Database
+- **SQLite**: Local data persistence
