@@ -998,6 +998,21 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _isSyncedMeta = const VerificationMeta(
+    'isSynced',
+  );
+  @override
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+    'is_synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_synced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1005,6 +1020,7 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
     totalAmount,
     paymentMethod,
     createdAt,
+    isSynced,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1062,6 +1078,12 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('is_synced')) {
+      context.handle(
+        _isSyncedMeta,
+        isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
+      );
+    }
     return context;
   }
 
@@ -1091,6 +1113,10 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      isSynced: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_synced'],
+      )!,
     );
   }
 
@@ -1106,12 +1132,14 @@ class Order extends DataClass implements Insertable<Order> {
   final double totalAmount;
   final String paymentMethod;
   final DateTime createdAt;
+  final bool isSynced;
   const Order({
     required this.id,
     required this.orderNumber,
     required this.totalAmount,
     required this.paymentMethod,
     required this.createdAt,
+    required this.isSynced,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1121,6 +1149,7 @@ class Order extends DataClass implements Insertable<Order> {
     map['total_amount'] = Variable<double>(totalAmount);
     map['payment_method'] = Variable<String>(paymentMethod);
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['is_synced'] = Variable<bool>(isSynced);
     return map;
   }
 
@@ -1131,6 +1160,7 @@ class Order extends DataClass implements Insertable<Order> {
       totalAmount: Value(totalAmount),
       paymentMethod: Value(paymentMethod),
       createdAt: Value(createdAt),
+      isSynced: Value(isSynced),
     );
   }
 
@@ -1145,6 +1175,7 @@ class Order extends DataClass implements Insertable<Order> {
       totalAmount: serializer.fromJson<double>(json['totalAmount']),
       paymentMethod: serializer.fromJson<String>(json['paymentMethod']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      isSynced: serializer.fromJson<bool>(json['isSynced']),
     );
   }
   @override
@@ -1156,6 +1187,7 @@ class Order extends DataClass implements Insertable<Order> {
       'totalAmount': serializer.toJson<double>(totalAmount),
       'paymentMethod': serializer.toJson<String>(paymentMethod),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'isSynced': serializer.toJson<bool>(isSynced),
     };
   }
 
@@ -1165,12 +1197,14 @@ class Order extends DataClass implements Insertable<Order> {
     double? totalAmount,
     String? paymentMethod,
     DateTime? createdAt,
+    bool? isSynced,
   }) => Order(
     id: id ?? this.id,
     orderNumber: orderNumber ?? this.orderNumber,
     totalAmount: totalAmount ?? this.totalAmount,
     paymentMethod: paymentMethod ?? this.paymentMethod,
     createdAt: createdAt ?? this.createdAt,
+    isSynced: isSynced ?? this.isSynced,
   );
   Order copyWithCompanion(OrdersCompanion data) {
     return Order(
@@ -1185,6 +1219,7 @@ class Order extends DataClass implements Insertable<Order> {
           ? data.paymentMethod.value
           : this.paymentMethod,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
     );
   }
 
@@ -1195,14 +1230,21 @@ class Order extends DataClass implements Insertable<Order> {
           ..write('orderNumber: $orderNumber, ')
           ..write('totalAmount: $totalAmount, ')
           ..write('paymentMethod: $paymentMethod, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('isSynced: $isSynced')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, orderNumber, totalAmount, paymentMethod, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    orderNumber,
+    totalAmount,
+    paymentMethod,
+    createdAt,
+    isSynced,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1211,7 +1253,8 @@ class Order extends DataClass implements Insertable<Order> {
           other.orderNumber == this.orderNumber &&
           other.totalAmount == this.totalAmount &&
           other.paymentMethod == this.paymentMethod &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.isSynced == this.isSynced);
 }
 
 class OrdersCompanion extends UpdateCompanion<Order> {
@@ -1220,12 +1263,14 @@ class OrdersCompanion extends UpdateCompanion<Order> {
   final Value<double> totalAmount;
   final Value<String> paymentMethod;
   final Value<DateTime> createdAt;
+  final Value<bool> isSynced;
   const OrdersCompanion({
     this.id = const Value.absent(),
     this.orderNumber = const Value.absent(),
     this.totalAmount = const Value.absent(),
     this.paymentMethod = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.isSynced = const Value.absent(),
   });
   OrdersCompanion.insert({
     this.id = const Value.absent(),
@@ -1233,6 +1278,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     required double totalAmount,
     required String paymentMethod,
     required DateTime createdAt,
+    this.isSynced = const Value.absent(),
   }) : orderNumber = Value(orderNumber),
        totalAmount = Value(totalAmount),
        paymentMethod = Value(paymentMethod),
@@ -1243,6 +1289,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     Expression<double>? totalAmount,
     Expression<String>? paymentMethod,
     Expression<DateTime>? createdAt,
+    Expression<bool>? isSynced,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1250,6 +1297,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
       if (totalAmount != null) 'total_amount': totalAmount,
       if (paymentMethod != null) 'payment_method': paymentMethod,
       if (createdAt != null) 'created_at': createdAt,
+      if (isSynced != null) 'is_synced': isSynced,
     });
   }
 
@@ -1259,6 +1307,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     Value<double>? totalAmount,
     Value<String>? paymentMethod,
     Value<DateTime>? createdAt,
+    Value<bool>? isSynced,
   }) {
     return OrdersCompanion(
       id: id ?? this.id,
@@ -1266,6 +1315,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
       totalAmount: totalAmount ?? this.totalAmount,
       paymentMethod: paymentMethod ?? this.paymentMethod,
       createdAt: createdAt ?? this.createdAt,
+      isSynced: isSynced ?? this.isSynced,
     );
   }
 
@@ -1287,6 +1337,9 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
     return map;
   }
 
@@ -1297,7 +1350,8 @@ class OrdersCompanion extends UpdateCompanion<Order> {
           ..write('orderNumber: $orderNumber, ')
           ..write('totalAmount: $totalAmount, ')
           ..write('paymentMethod: $paymentMethod, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('isSynced: $isSynced')
           ..write(')'))
         .toString();
   }
@@ -2605,6 +2659,7 @@ typedef $$OrdersTableCreateCompanionBuilder =
       required double totalAmount,
       required String paymentMethod,
       required DateTime createdAt,
+      Value<bool> isSynced,
     });
 typedef $$OrdersTableUpdateCompanionBuilder =
     OrdersCompanion Function({
@@ -2613,6 +2668,7 @@ typedef $$OrdersTableUpdateCompanionBuilder =
       Value<double> totalAmount,
       Value<String> paymentMethod,
       Value<DateTime> createdAt,
+      Value<bool> isSynced,
     });
 
 final class $$OrdersTableReferences
@@ -2669,6 +2725,11 @@ class $$OrdersTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2731,6 +2792,11 @@ class $$OrdersTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+    column: $table.isSynced,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$OrdersTableAnnotationComposer
@@ -2762,6 +2828,9 @@ class $$OrdersTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
 
   Expression<T> orderItemsRefs<T extends Object>(
     Expression<T> Function($$OrderItemsTableAnnotationComposer a) f,
@@ -2822,12 +2891,14 @@ class $$OrdersTableTableManager
                 Value<double> totalAmount = const Value.absent(),
                 Value<String> paymentMethod = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> isSynced = const Value.absent(),
               }) => OrdersCompanion(
                 id: id,
                 orderNumber: orderNumber,
                 totalAmount: totalAmount,
                 paymentMethod: paymentMethod,
                 createdAt: createdAt,
+                isSynced: isSynced,
               ),
           createCompanionCallback:
               ({
@@ -2836,12 +2907,14 @@ class $$OrdersTableTableManager
                 required double totalAmount,
                 required String paymentMethod,
                 required DateTime createdAt,
+                Value<bool> isSynced = const Value.absent(),
               }) => OrdersCompanion.insert(
                 id: id,
                 orderNumber: orderNumber,
                 totalAmount: totalAmount,
                 paymentMethod: paymentMethod,
                 createdAt: createdAt,
+                isSynced: isSynced,
               ),
           withReferenceMapper: (p0) => p0
               .map(

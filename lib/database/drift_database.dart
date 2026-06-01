@@ -44,6 +44,7 @@ class Orders extends Table {
   RealColumn get totalAmount => real()();
   TextColumn get paymentMethod => text()();
   DateTimeColumn get createdAt => dateTime()();
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
 }
 
 class OrderItems extends Table {
@@ -61,7 +62,19 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) async {
+          await m.createAll();
+        },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.addColumn(orders, orders.isSynced);
+          }
+        },
+      );
 
   Future<void> seedInitialData() async {
     final count = await (select(categories)
