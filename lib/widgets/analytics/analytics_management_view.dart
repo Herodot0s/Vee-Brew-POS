@@ -1,58 +1,97 @@
+// lib/widgets/analytics/analytics_management_view.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/analytics_provider.dart';
-import '../admin/bento_card.dart';
-import 'components/time_range_selector.dart';
+import '../../providers/mock_analytics_provider.dart';
+import '../admin/metric_tile.dart';
+import 'components/top_products_card.dart';
+import 'components/payment_methods_card.dart';
+import 'components/peak_hours_card.dart';
+import '../../theme/binance_theme.dart';
 
 class AnalyticsManagementView extends ConsumerWidget {
   const AnalyticsManagementView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final summaryAsync = ref.watch(analyticsSummaryProvider);
+    // Switch to real provider when backend logic is fully written.
+    final summaryAsync = ref.watch(mockAnalyticsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Analytics')),
+      appBar: AppBar(title: const Text('Analytics Command Center')),
       body: summaryAsync.when(
         data: (summary) => CustomScrollView(
           slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Text('Time Range: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(width: 8),
+                    // Placeholder for TimeRangeSelector if not fully functional
+                    DropdownButton<String>(
+                      value: 'Today',
+                      items: ['Today', 'This Week', 'This Month'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                      onChanged: (_) {},
+                    ),
+                  ],
+                ),
+              ),
+            ),
             SliverPadding(
               padding: const EdgeInsets.all(16),
               sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 400,
                   mainAxisSpacing: 16,
                   crossAxisSpacing: 16,
                   childAspectRatio: 1.5,
                 ),
                 delegate: SliverChildListDelegate([
-                  BentoCard(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Revenue',
-                            style: Theme.of(context).textTheme.titleMedium),
-                        const SizedBox(height: 8),
-                        Text('\$${summary.totalRevenue.toStringAsFixed(2)}',
-                            style: Theme.of(context).textTheme.headlineLarge),
-                      ],
-                    ),
+                  MetricTile(
+                    label: 'Total Revenue',
+                    value: '\$${summary.totalRevenue.toStringAsFixed(2)}',
+                    icon: Icons.attach_money,
+                    color: BinanceTheme.tradingUp,
                   ),
-                  BentoCard(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Items Sold',
-                            style: Theme.of(context).textTheme.titleMedium),
-                        const SizedBox(height: 8),
-                        Text('${summary.totalQuantity}',
-                            style: Theme.of(context).textTheme.headlineMedium),
-                      ],
-                    ),
+                  MetricTile(
+                    label: 'Net Sales',
+                    value: '\$${summary.netSales.toStringAsFixed(2)}',
+                    icon: Icons.account_balance_wallet,
+                  ),
+                  MetricTile(
+                    label: 'Total Orders',
+                    value: summary.totalOrders.toString(),
+                    icon: Icons.receipt_long,
+                    color: BinanceTheme.primary,
+                  ),
+                  MetricTile(
+                    label: 'AOV',
+                    value: '\$${summary.averageOrderValue.toStringAsFixed(2)}',
+                    icon: Icons.shopping_basket,
+                    color: BinanceTheme.primary,
                   ),
                 ]),
               ),
             ),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 600,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 1.2,
+                ),
+                delegate: SliverChildListDelegate([
+                  TopProductsCard(topProducts: summary.topProducts),
+                  PeakHoursCard(peakHours: summary.peakHours),
+                  PaymentMethodsCard(paymentMethods: summary.paymentMethods),
+                ]),
+              ),
+            ),
+            const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
           ],
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
