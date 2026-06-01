@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'analytics_provider.dart';
+part of 'mock_analytics_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,41 +9,41 @@ part of 'analytics_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(analyticsSummary)
-final analyticsSummaryProvider = AnalyticsSummaryProvider._();
+@ProviderFor(mockAnalytics)
+final mockAnalyticsProvider = MockAnalyticsProvider._();
 
-final class AnalyticsSummaryProvider
+final class MockAnalyticsProvider
     extends
         $FunctionalProvider<
           AsyncValue<AnalyticsSummary>,
           AnalyticsSummary,
-          Stream<AnalyticsSummary>
+          FutureOr<AnalyticsSummary>
         >
-    with $FutureModifier<AnalyticsSummary>, $StreamProvider<AnalyticsSummary> {
-  AnalyticsSummaryProvider._()
+    with $FutureModifier<AnalyticsSummary>, $FutureProvider<AnalyticsSummary> {
+  MockAnalyticsProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'analyticsSummaryProvider',
+        name: r'mockAnalyticsProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$analyticsSummaryHash();
+  String debugGetCreateSourceHash() => _$mockAnalyticsHash();
 
   @$internal
   @override
-  $StreamProviderElement<AnalyticsSummary> $createElement(
+  $FutureProviderElement<AnalyticsSummary> $createElement(
     $ProviderPointer pointer,
-  ) => $StreamProviderElement(pointer);
+  ) => $FutureProviderElement(pointer);
 
   @override
-  Stream<AnalyticsSummary> create(Ref ref) {
-    return analyticsSummary(ref);
+  FutureOr<AnalyticsSummary> create(Ref ref) {
+    return mockAnalytics(ref);
   }
 }
 
-String _$analyticsSummaryHash() => r'fbf7e18d9d5ccf73f485fd7e658fdab10c2ef451';
+String _$mockAnalyticsHash() => r'3d2fab164358f84e6613e95b4170451884402e37';

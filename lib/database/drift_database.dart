@@ -30,12 +30,13 @@ class Products extends Table {
 
 class Modifiers extends Table {
   TextColumn get id => text()();
+  TextColumn get productId => text().references(Products, #id)();
   TextColumn get name => text()();
   RealColumn get priceDelta => real()();
   TextColumn get groupName => text()();
 
   @override
-  Set<Column> get primaryKey => {id};
+  Set<Column> get primaryKey => {id, productId};
 }
 
 class Orders extends Table {
@@ -62,7 +63,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -72,6 +73,11 @@ class AppDatabase extends _$AppDatabase {
     onUpgrade: (m, from, to) async {
       if (from < 2) {
         await m.addColumn(orders, orders.isSynced);
+      }
+      if (from < 3) {
+        // Drop and recreate modifiers table to update primary key and add productId
+        await m.deleteTable('modifiers');
+        await m.createTable(modifiers);
       }
     },
   );
@@ -107,9 +113,25 @@ class AppDatabase extends _$AppDatabase {
             await into(modifiers).insertOnConflictUpdate(
               ModifiersCompanion.insert(
                 id: option.id,
+                productId: prod.id,
                 name: option.name,
                 priceDelta: option.priceDelta,
-                groupName: group.id,
+                groupName: group.name,
+              ),
+            );
+          }
+        }
+
+        // Add global add-ons for beverage products
+        if (prod.categoryId != 'fries' && prod.categoryId != 'hot_brew') {
+          for (final addon in mockAddOns) {
+            await into(modifiers).insertOnConflictUpdate(
+              ModifiersCompanion.insert(
+                id: addon.id,
+                productId: prod.id,
+                name: addon.name,
+                priceDelta: addon.priceDelta,
+                groupName: 'Add-ons',
               ),
             );
           }

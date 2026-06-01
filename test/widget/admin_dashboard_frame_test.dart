@@ -24,29 +24,28 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Admin Area'), findsOneWidget);
-    expect(find.text('Admin Console'), findsNothing);
+    expect(find.text('Analytics'), findsNothing);
 
     await tester.tap(find.text('Admin Area'));
     await tester.pumpAndSettle();
 
     expect(find.text('POS Terminal'), findsOneWidget);
-    expect(find.text('Admin Console'), findsOneWidget);
-    expect(find.text('Order History'), findsOneWidget);
-    expect(find.text('Categories'), findsOneWidget);
+    expect(find.text('Orders'), findsOneWidget);
+    expect(find.text('Categories'), findsWidgets);
     expect(find.text('Products'), findsOneWidget);
     expect(find.text('Modifiers'), findsOneWidget);
 
     final container = ProviderScope.containerOf(
       tester.element(find.byType(POSScreen)),
     );
-    expect(container.read(adminViewActiveProvider), isTrue);
+    expect(container.read(isAdminModeProvider), isTrue);
 
     await tester.tap(find.text('Cheesecake'));
     await tester.pumpAndSettle();
 
     expect(container.read(selectedCategoryProvider), 'cheesecake');
-    expect(container.read(adminViewActiveProvider), isFalse);
-    expect(find.text('Admin Console'), findsNothing);
+    expect(container.read(isAdminModeProvider), isFalse);
+    expect(find.text('Orders'), findsNothing);
 
     await db.close();
   });

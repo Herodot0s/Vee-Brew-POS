@@ -41,4 +41,9 @@ final productsStreamProvider = StreamProvider<List<Product>>((ref) {
       .watch();
 });
 
+final modifiersStreamProvider = StreamProvider<List<Modifier>>((ref) {
+  final db = ref.watch(databaseProvider);
+  return (db.select(db.modifiers)).watch();
+});
+
 enum TimeRange { day, week, month, year }

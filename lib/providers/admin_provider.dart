@@ -70,3 +70,82 @@ final orderItemsProvider = FutureProvider.family<List<OrderItem>, int>((
     db.orderItems,
   )..where((t) => t.orderId.equals(orderId))).get();
 });
+
+// Admin Product Filtering
+final adminSearchQueryProvider = NotifierProvider<AdminSearchQuery, String>(
+  () => AdminSearchQuery(),
+);
+
+class AdminSearchQuery extends Notifier<String> {
+  @override
+  String build() => '';
+  set value(String v) => state = v;
+}
+
+final adminSelectedCategoryProvider =
+    NotifierProvider<AdminSelectedCategory, String?>(
+      () => AdminSelectedCategory(),
+    );
+
+class AdminSelectedCategory extends Notifier<String?> {
+  @override
+  String? build() => null;
+  set value(String? v) => state = v;
+}
+
+final adminFilteredProductsProvider = StreamProvider<List<Product>>((ref) {
+  final db = ref.watch(databaseProvider);
+  final query = ref.watch(adminSearchQueryProvider).toLowerCase();
+  final catId = ref.watch(adminSelectedCategoryProvider);
+
+  return (db.select(db.products)..where((t) {
+    Expression<bool> predicate = const Constant(true);
+    if (query.isNotEmpty) {
+      predicate = predicate & t.name.lower().like('%$query%');
+    }
+    if (catId != null) {
+      predicate = predicate & t.categoryId.equals(catId);
+    }
+    return predicate;
+  })).watch();
+});
+
+// Admin Modifier Filtering
+final adminModifierSearchQueryProvider =
+    NotifierProvider<AdminModifierSearchQuery, String>(
+      () => AdminModifierSearchQuery(),
+    );
+
+class AdminModifierSearchQuery extends Notifier<String> {
+  @override
+  String build() => '';
+  set value(String v) => state = v;
+}
+
+final adminSelectedModifierGroupProvider =
+    NotifierProvider<AdminSelectedModifierGroup, String?>(
+      () => AdminSelectedModifierGroup(),
+    );
+
+class AdminSelectedModifierGroup extends Notifier<String?> {
+  @override
+  String? build() => null;
+  set value(String? v) => state = v;
+}
+
+final adminFilteredModifiersProvider = StreamProvider<List<Modifier>>((ref) {
+  final db = ref.watch(databaseProvider);
+  final query = ref.watch(adminModifierSearchQueryProvider).toLowerCase();
+  final groupId = ref.watch(adminSelectedModifierGroupProvider);
+
+  return (db.select(db.modifiers)..where((t) {
+    Expression<bool> predicate = const Constant(true);
+    if (query.isNotEmpty) {
+      predicate = predicate & t.name.lower().like('%$query%');
+    }
+    if (groupId != null) {
+      predicate = predicate & t.groupName.equals(groupId);
+    }
+    return predicate;
+  })).watch();
+});
