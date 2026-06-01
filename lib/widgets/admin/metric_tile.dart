@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/binance_theme.dart';
 import 'bento_card.dart';
 
 class MetricTile extends StatelessWidget {
@@ -12,7 +13,7 @@ class MetricTile extends StatelessWidget {
     required this.label,
     required this.value,
     required this.icon,
-    this.color = Colors.blue,
+    this.color = BinanceTheme.primary,
   });
 
   @override
@@ -27,19 +28,22 @@ class MetricTile extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 label,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[600],
-                    ),
+                style: BinanceTheme.titleStyle(
+                  size: 12,
+                  weight: FontWeight.w500,
+                  color: BinanceTheme.muted,
+                ),
               ),
             ],
           ),
           const Spacer(),
           Text(
             value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: BinanceTheme.numberStyle(
+              size: 20,
+              weight: FontWeight.bold,
+              color: BinanceTheme.body,
+            ),
           ),
         ],
       ),
