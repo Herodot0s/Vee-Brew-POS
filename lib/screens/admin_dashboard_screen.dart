@@ -7,55 +7,74 @@ import '../providers/data_providers.dart';
 import '../providers/database_provider.dart';
 import '../database/drift_database.dart';
 import '../widgets/analytics/analytics_management_view.dart';
+import '../widgets/admin/order_filter_sidebar.dart';
+import '../widgets/admin/order_detail_view.dart';
 
 class _OrderHistoryView extends ConsumerWidget {
   const _OrderHistoryView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ordersAsync = ref.watch(ordersStreamProvider);
-    return ordersAsync.when(
-      data: (orders) => ListView.builder(
-        itemCount: orders.length,
-        itemBuilder: (context, index) {
-          final order = orders[index];
-          return ExpansionTile(
-            title: Text(
-              'Order #${order.orderNumber}',
-              style: const TextStyle(color: BinanceTheme.onDark),
-            ),
-            subtitle: Text('Status: ${order.isSynced ? 'Synced' : 'Pending'}'),
-            trailing: order.isSynced
-                ? const Icon(Icons.check, color: Colors.green)
-                : ElevatedButton(
-                    onPressed: () async {
-                      final db = ref.read(databaseProvider);
-                      await Future.delayed(const Duration(milliseconds: 1200));
-                      await (db.update(db.orders)
-                            ..where((t) => t.id.equals(order.id)))
-                          .write(OrdersCompanion(isSynced: Value(true)));
-                    },
-                    child: const Text('Sync'),
+    final ordersAsync = ref.watch(filteredOrdersStreamProvider);
+    return Row(
+      children: [
+        const OrderFilterSidebar(),
+        Expanded(
+          child: ordersAsync.when(
+            data: (orders) => ListView.builder(
+              itemCount: orders.length,
+              itemBuilder: (context, index) {
+                final order = orders[index];
+                return ExpansionTile(
+                  title: Text(
+                    'Order #${order.orderNumber}',
+                    style: const TextStyle(color: BinanceTheme.onDark),
                   ),
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(BinanceTheme.spaceMd),
-                child: Text(
-                  'Total: ₱${order.totalAmount}',
-                  style: const TextStyle(color: BinanceTheme.onDark),
-                ),
+                  subtitle: Text('Status: ${order.isSynced ? 'Synced' : 'Pending'}'),
+                  trailing: order.isSynced
+                      ? const Icon(Icons.check, color: Colors.green)
+                      : ElevatedButton(
+                          onPressed: () async {
+                            final db = ref.read(databaseProvider);
+                            await Future.delayed(const Duration(milliseconds: 1200));
+                            await (db.update(db.orders)
+                                  ..where((t) => t.id.equals(order.id)))
+                                .write(OrdersCompanion(isSynced: Value(true)));
+                          },
+                          child: const Text('Sync'),
+                        ),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(BinanceTheme.spaceMd),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Total: ₱${order.totalAmount}',
+                            style: const TextStyle(
+                              color: BinanceTheme.onDark,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          OrderDetailView(orderId: order.id),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+            error: (_, __) => const Center(
+              child: Text(
+                'Error loading orders',
+                style: TextStyle(color: Colors.red),
               ),
-            ],
-          );
-        },
-      ),
-      error: (_, __) => const Center(
-        child: Text(
-          'Error loading orders',
-          style: TextStyle(color: Colors.red),
+            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+          ),
         ),
-      ),
-      loading: () => const Center(child: CircularProgressIndicator()),
+      ],
     );
   }
 }
