@@ -9,6 +9,7 @@ class BinanceTheme {
   static const Color primaryActive = Color(0xFFF0B90B);
   static const Color body = Color(0xFFEAECEF);
   static const Color muted = Color(0xFF707A8A);
+  static const Color error = Color(0xFFF6465D);
   static const Color tradingUp = Color(0xFF0ECB81);
   static const Color tradingDown = Color(0xFFF6465D);
   static const Color onPrimary = Color(0xFF181A20);
@@ -31,23 +32,17 @@ class BinanceTheme {
   static const double spaceLg = 24.0;
   static const double spaceXl = 32.0;
 
-  static TextStyle titleStyle({
-    double size = 14,
-    FontWeight weight = FontWeight.w600,
-    Color color = body,
-  }) {
-    return GoogleFonts.inter(fontSize: size, fontWeight: weight, color: color);
-  }
+  static TextStyle titleStyle({Color? color, double? size, FontWeight? weight}) =>
+      GoogleFonts.inter(
+        fontSize: size ?? 14,
+        fontWeight: weight ?? FontWeight.w600,
+        color: color ?? body,
+      );
 
-  static TextStyle numberStyle({
-    double size = 14,
-    FontWeight weight = FontWeight.w500,
-    Color color = primary,
-  }) {
-    return GoogleFonts.jetBrainsMono(
-      fontSize: size,
-      fontWeight: weight,
-      color: color,
-    );
-  }
+  static TextStyle numberStyle({Color? color, double? size, FontWeight? weight}) =>
+      GoogleFonts.jetBrainsMono(
+        fontSize: size ?? 14,
+        fontWeight: weight ?? FontWeight.w500,
+        color: color ?? primary,
+      );
 }

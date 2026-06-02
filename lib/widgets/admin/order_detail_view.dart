@@ -52,12 +52,12 @@ class OrderDetailView extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             '${item.quantity}x ${product.name}',
-                            style: BinanceTheme.titleStyle,
+                            style: BinanceTheme.titleStyle(),
                           ),
                         ),
                         Text(
                           '₱${item.priceAtTime.toStringAsFixed(2)}',
-                          style: BinanceTheme.numberStyle,
+                          style: BinanceTheme.numberStyle(),
                         ),
                       ],
                     ),
