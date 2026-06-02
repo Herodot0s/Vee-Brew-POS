@@ -139,6 +139,14 @@ class AppDatabase extends _$AppDatabase {
       }
     });
   }
+
+  Stream<List<Order>> watchFilteredOrders(DateTime start, DateTime end) {
+    return (select(orders)
+          ..where((t) => t.createdAt.isBetweenValues(start, end))
+          ..orderBy(
+              [(t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)]))
+        .watch();
+  }
 }
 
 LazyDatabase _openConnection() {
