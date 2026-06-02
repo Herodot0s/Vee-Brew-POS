@@ -59,16 +59,33 @@ final ordersStreamProvider = StreamProvider<List<Order>>((ref) {
       .watch();
 });
 
+class OrderItemWithProduct {
+  final OrderItem item;
+  final Product product;
+  OrderItemWithProduct(this.item, this.product);
+}
+
 // Order items stream provider for an order id
-final orderItemsProvider = FutureProvider.family<List<OrderItem>, int>((
-  ref,
-  orderId,
-) {
-  final db = ref.watch(databaseProvider);
-  return (db.select(
-    db.orderItems,
-  )..where((t) => t.orderId.equals(orderId))).get();
-});
+final orderItemsProvider =
+    FutureProvider.family<List<OrderItemWithProduct>, int>((
+      ref,
+      orderId,
+    ) {
+      final db = ref.watch(databaseProvider);
+      final query = db.select(db.orderItems).join([
+        innerJoin(db.products, db.products.id.equalsExp(db.orderItems.productId)),
+      ]);
+      query.where(db.orderItems.orderId.equals(orderId));
+
+      return query.get().then((rows) {
+        return rows.map((row) {
+          return OrderItemWithProduct(
+            row.readTable(db.orderItems),
+            row.readTable(db.products),
+          );
+        }).toList();
+      });
+    });
 
 // Admin Product Filtering
 final adminSearchQueryProvider = NotifierProvider<AdminSearchQuery, String>(
