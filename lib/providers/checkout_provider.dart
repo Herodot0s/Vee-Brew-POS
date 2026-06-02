@@ -18,6 +18,10 @@ class CheckoutService {
   CheckoutService(this._ref);
 
   Future<void> processCheckout(String paymentMethod) async {
+    if (!['Cash', 'Card', 'GCash'].contains(paymentMethod)) {
+      throw Exception('Unsupported payment method: $paymentMethod');
+    }
+
     final db = _ref.read(databaseProvider);
     final cartItems = _ref.read(cartProvider);
     final total = _ref.read(cartTotalProvider);
