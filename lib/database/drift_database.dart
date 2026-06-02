@@ -140,11 +140,12 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  /// Watches orders within a date range (start inclusive, end inclusive).
+  /// Expects Local timezone [DateTime] objects matching UI filters.
   Stream<List<Order>> watchFilteredOrders(DateTime start, DateTime end) {
     return (select(orders)
           ..where((t) => t.createdAt.isBetweenValues(start, end))
-          ..orderBy(
-              [(t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)]))
+          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
         .watch();
   }
 }
