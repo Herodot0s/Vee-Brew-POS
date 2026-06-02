@@ -116,6 +116,34 @@ final adminModifierSearchQueryProvider =
       () => AdminModifierSearchQuery(),
     );
 
+class AdminOrderFilter {
+  final DateTime start;
+  final DateTime end;
+  final String label;
+
+  AdminOrderFilter({
+    required this.start,
+    required this.end,
+    this.label = 'Custom',
+  });
+}
+
+final adminOrderFilterProvider = StateProvider<AdminOrderFilter>((ref) {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  return AdminOrderFilter(
+    start: today,
+    end: today.add(const Duration(days: 1)),
+    label: 'Today',
+  );
+});
+
+final filteredOrdersStreamProvider = StreamProvider<List<Order>>((ref) {
+  final filter = ref.watch(adminOrderFilterProvider);
+  final db = ref.watch(databaseProvider);
+  return db.watchFilteredOrders(filter.start, filter.end);
+});
+
 class AdminModifierSearchQuery extends Notifier<String> {
   @override
   String build() => '';
