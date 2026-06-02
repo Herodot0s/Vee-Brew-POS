@@ -9,6 +9,26 @@ import 'package:veebrew/widgets/order_ticket.dart';
 import 'package:veebrew/widgets/checkout_modal.dart';
 
 void main() {
+  testWidgets('CheckoutModal shows GCash button and transitions to GCash view', (tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(body: CheckoutModal()),
+        ),
+      ),
+    );
+
+    expect(find.text('GCASH'), findsOneWidget);
+
+    // Tap GCash
+    await tester.tap(find.text('GCASH'));
+    await tester.pumpAndSettle();
+
+    // Should show GCash payment view
+    expect(find.text('Reference Number'), findsOneWidget);
+    expect(find.text('GCASH'), findsNothing); // Original buttons hidden
+  });
+
   testWidgets('CheckoutModal processes payment and clears cart', (
     tester,
   ) async {

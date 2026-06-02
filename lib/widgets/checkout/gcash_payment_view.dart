@@ -72,20 +72,24 @@ class _GCashPaymentViewState extends State<GCashPaymentView> {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            TextButton(
-              onPressed: widget.onCancel,
-              child: const Text('Cancel', style: TextStyle(color: BinanceTheme.muted)),
+            Expanded(
+              child: TextButton(
+                onPressed: widget.onCancel,
+                child: const Text('Cancel', style: TextStyle(color: BinanceTheme.muted)),
+              ),
             ),
             const SizedBox(width: BinanceTheme.spaceMd),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: BinanceTheme.primary,
-                foregroundColor: Colors.black,
+            Expanded(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: BinanceTheme.primary,
+                  foregroundColor: Colors.black,
+                ),
+                onPressed: _refController.text.trim().isEmpty
+                    ? null
+                    : () => widget.onConfirm(_refController.text.trim()),
+                child: const Text('Confirm Payment'),
               ),
-              onPressed: _refController.text.trim().isEmpty
-                  ? null
-                  : () => widget.onConfirm(_refController.text.trim()),
-              child: const Text('Confirm Payment'),
             ),
           ],
         ),
