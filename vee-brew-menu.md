@@ -21,11 +21,11 @@ Note: The source image is low-resolution and slightly blurred. Crossed-out or un
 | Matcha | Red Velvet |
 | Mango | Very Rocky Road |
 | Avocado | Double Dutch |
-| Blueberry | `[obscured / unreadable]` |
+| Blueberry |  |
 | Strawberry | Black Forest |
 | Taro | Hokkaido |
-| Dark Chocolate | `[obscured / unreadable]` |
-| `[obscured / unreadable]` | Hazel Nut |
+| Dark Chocolate |  |
+|  | Hazel Nut |
 | Cookies & Cream |  |
 
 ## Cheesecake
@@ -45,11 +45,11 @@ Note: The source image is low-resolution and slightly blurred. Crossed-out or un
 | Matcha | Red Velvet |
 | Mango | Very Rocky Road |
 | Avocado | Double Dutch |
-| Blueberry | `[obscured / unreadable]` |
+| Blueberry |  |
 | Strawberry | Black Forest |
 | Taro | Hokkaido |
-| Dark Chocolate | `[obscured / unreadable]` |
-| `[obscured / unreadable]` | Hazel Nut |
+| Dark Chocolate |  |
+| | Hazel Nut |
 | Cookies & Cream |  |
 
 ## Fruit Tea - Tea Based
@@ -117,7 +117,7 @@ The flavor list appears to apply to both Tea Based and Water Based fruit tea.
 
 | Column 1 | Column 2 |
 |---|---|
-| Hot Americano | Hot Chocolate `[unclear]` |
+| Hot Americano | Hot Chocolate |
 | Spanish Latte | White Mocha |
 | Mocha Latte | French Vanilla |
 | Java Latte | Salted Caramel Latte |
@@ -168,6 +168,14 @@ The visible price markers for the Frappe section show Medium 45 and Large 55.
 | Taro | Double Dutch |
 | Mango | Triple Chocolate |
 | Avocado | Dark Choco Berry |
-| Red Velvet | Blueberry & `[unclear]` |
-| Green Apple | Strawberries & Cream `[unclear]` |
+| Red Velvet | Blueberries & Cream |
+| Green Apple | Strawberries & Cream  |
 | Peach Mango |  |
+
+## Addons For Every Each Cup
+Pearl - 10
+Nata - 15
+Coffee Jelly - 15
+Cream Cheese - 15
+Crushed Orea - 15
+Crushed Graham - 15

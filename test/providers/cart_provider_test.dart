@@ -56,6 +56,33 @@ void main() {
     expect(cart.first.product.name, 'Test Tea');
   });
 
+  test('removeItem removes item by index', () {
+    const product1 = Product(
+      id: '1',
+      name: 'Test Tea 1',
+      basePrice: 5.0,
+      categoryId: '1',
+    );
+    const product2 = Product(
+      id: '2',
+      name: 'Test Tea 2',
+      basePrice: 10.0,
+      categoryId: '1',
+    );
+
+    final notifier = container.read(cartProvider.notifier);
+    notifier.addQuickTap(product1);
+    notifier.addQuickTap(product2);
+
+    expect(container.read(cartProvider).length, 2);
+
+    notifier.removeItem(0);
+    final cart = container.read(cartProvider);
+
+    expect(cart.length, 1);
+    expect(cart.first.product.name, 'Test Tea 2');
+  });
+
   test('clearCart empties the cart', () {
     const product = Product(
       id: '1',
@@ -90,5 +117,51 @@ void main() {
     container.read(cartProvider.notifier).addQuickTap(product2);
 
     expect(container.read(cartProvider.notifier).total, 8.5);
+  });
+
+  test('updateConfiguredItem updates item at correct index', () {
+    const product1 = Product(
+      id: '1',
+      name: 'Test Tea 1',
+      basePrice: 5.0,
+      categoryId: '1',
+    );
+    const product2 = Product(
+      id: '2',
+      name: 'Test Tea 2',
+      basePrice: 10.0,
+      categoryId: '1',
+    );
+
+    final notifier = container.read(cartProvider.notifier);
+    notifier.addQuickTap(product1);
+
+    expect(container.read(cartProvider)[0].product.name, 'Test Tea 1');
+
+    notifier.updateConfiguredItem(0, const OrderItem(product: product2, selectedModifiers: []));
+    expect(container.read(cartProvider)[0].product.name, 'Test Tea 2');
+  });
+
+  test('removeItem and undoDelete recovers deleted item', () {
+    const product = Product(
+      id: '1',
+      name: 'Test Tea 1',
+      basePrice: 5.0,
+      categoryId: '1',
+    );
+
+    final notifier = container.read(cartProvider.notifier);
+    notifier.addQuickTap(product);
+
+    expect(notifier.canUndo, isFalse);
+
+    notifier.removeItem(0);
+    expect(container.read(cartProvider), isEmpty);
+    expect(notifier.canUndo, isTrue);
+
+    notifier.undoDelete();
+    expect(container.read(cartProvider).length, 1);
+    expect(container.read(cartProvider)[0].product.name, 'Test Tea 1');
+    expect(notifier.canUndo, isFalse);
   });
 }

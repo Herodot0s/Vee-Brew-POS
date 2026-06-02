@@ -49,21 +49,21 @@ final List<Product> mockProducts = [
 
   // Cold Brew (Base Med: 45)
   ...[
-    'Americano', 'Chocolate', 'Spanish Latte', 'White Mocha', 'Mocha Latte', 'French Vanilla',
+    'Iced Americano', 'Iced Chocolate', 'Spanish Latte', 'White Mocha', 'Mocha Latte', 'French Vanilla',
     'Java Latte', 'Salted Caramel Latte', 'Cappuccino Latte', 'Caramel Sugar', 'Matcha Latte',
     'Caramel Macchiato'
-  ].map((f) => Product(id: 'cb_${f.toLowerCase().replaceAll(' ', '_')}', name: 'Iced $f', basePrice: 45.0, categoryId: 'cold_brew')),
+  ].map((f) => Product(id: 'cb_${f.toLowerCase().replaceAll(' ', '_')}', name: f, basePrice: 45.0, categoryId: 'cold_brew')),
 
   // Hot Brew (Fixed: 45)
   ...[
-    'Americano', 'Chocolate', 'Spanish Latte', 'White Mocha', 'Mocha Latte', 'French Vanilla',
+    'Hot Americano', 'Hot Chocolate', 'Spanish Latte', 'White Mocha', 'Mocha Latte', 'French Vanilla',
     'Java Latte', 'Salted Caramel Latte', 'Cappuccino Latte', 'Caramel Sugar', 'Matcha Latte',
     'Caramel Macchiato'
-  ].map((f) => Product(id: 'hb_${f.toLowerCase().replaceAll(' ', '_')}', name: 'Hot $f', basePrice: 45.0, categoryId: 'hot_brew')),
+  ].map((f) => Product(id: 'hb_${f.toLowerCase().replaceAll(' ', '_')}', name: f, basePrice: 45.0, categoryId: 'hot_brew')),
 
   // Premium Frappe (Mixed Base)
-  Product(id: 'pf_cookies_cream', name: 'Cookies & Cream Premium', basePrice: 65.0, categoryId: 'premium_frappe'),
-  Product(id: 'pf_mango_graham', name: 'Mango Graham Premium', basePrice: 55.0, categoryId: 'premium_frappe'),
+  Product(id: 'pf_cookies_cream', name: 'Cookies & Cream', basePrice: 65.0, categoryId: 'premium_frappe'),
+  Product(id: 'pf_mango_graham', name: 'Mango Graham', basePrice: 55.0, categoryId: 'premium_frappe'),
 
   // Frappe Coffee (Base Med: 45)
   ...['Dark Caramel', 'Dark Cappuccino', 'Dark Mocha', 'Java Chip'].map((f) => Product(id: 'fc_${f.toLowerCase().replaceAll(' ', '_')}', name: '$f Frappe', basePrice: 45.0, categoryId: 'frappe_coffee')),
@@ -71,9 +71,9 @@ final List<Product> mockProducts = [
   // Frappe Non-Coffee (Base Med: 45)
   ...[
     'Matcha', 'Rocky Road', 'Taro', 'Double Dutch', 'Mango', 'Triple Chocolate', 'Avocado',
-    'Dark Choco Berry', 'Red Velvet', 'Blueberry', 'Green Apple', 'Strawberries & Cream',
-    'Peach Mango', 'Mixed Berries'
-  ].map((f) => Product(id: 'fnc_${f.toLowerCase().replaceAll(' ', '_')}', name: '$f Frappe (Non-Coffee)', basePrice: 45.0, categoryId: 'frappe_non_coffee')),
+    'Dark Choco Berry', 'Red Velvet', 'Blueberries & Cream', 'Green Apple', 'Strawberries & Cream',
+    'Peach Mango'
+  ].map((f) => Product(id: 'fnc_${f.toLowerCase().replaceAll(' ', '_')}', name: '$f Frappe', basePrice: 45.0, categoryId: 'frappe_non_coffee')),
 
   // Fries (Base Small)
   Product(id: 'fr_plain', name: 'Plain Fries', basePrice: 30.0, categoryId: 'fries'),
@@ -117,11 +117,30 @@ List<ModifierGroup> getModifierGroupsForProduct(Product product) {
 
   List<ModifierOption> sizeOptions = [
     ModifierOption(id: 'sz_med', groupId: 'size', name: 'Medium', priceDelta: 0.0, isDefault: true),
-    ModifierOption(id: 'sz_lrg', groupId: 'size', name: 'Large', priceDelta: (product.id == 'pf_cookies_cream' ? 20.0 : product.id == 'pf_mango_graham' ? 30.0 : 10.0)),
+    ModifierOption(id: 'sz_lrg', groupId: 'size', name: 'Large', priceDelta: (product.categoryId == 'milk_tea' || product.categoryId == 'cheesecake' || product.categoryId.startsWith('fruit_tea') || product.categoryId.startsWith('frappe') || product.categoryId == 'cold_brew') ? 10.0 : 0.0),
   ];
 
+  // Specific overrides for Premium Frappe sizes
+  if (product.id == 'pf_cookies_cream') {
+     sizeOptions = [
+      ModifierOption(id: 'sz_med', groupId: 'size', name: 'Medium', priceDelta: 0.0, isDefault: true),
+      ModifierOption(id: 'sz_lrg', groupId: 'size', name: 'Large', priceDelta: 20.0),
+    ];
+  } else if (product.id == 'pf_mango_graham') {
+    sizeOptions = [
+      ModifierOption(id: 'sz_med', groupId: 'size', name: 'Medium', priceDelta: 0.0, isDefault: true),
+      ModifierOption(id: 'sz_lrg', groupId: 'size', name: 'Large', priceDelta: 30.0),
+    ];
+  }
+
   if (product.categoryId == 'milk_tea' || product.categoryId == 'cheesecake' || product.categoryId.startsWith('fruit_tea')) {
-    sizeOptions.add(ModifierOption(id: 'sz_liter', groupId: 'size', name: '1 Liter', priceDelta: 40.0));
+    double literDelta = 40.0;
+    if (product.categoryId == 'milk_tea') literDelta = 40.0; // 28 -> 68
+    if (product.categoryId == 'cheesecake') literDelta = 40.0; // 43 -> 83
+    if (product.categoryId == 'fruit_tea_tea') literDelta = 40.0; // 45 -> 85
+    if (product.categoryId == 'fruit_tea_water') literDelta = 40.0; // 35 -> 75
+
+    sizeOptions.add(ModifierOption(id: 'sz_liter', groupId: 'size', name: '1 Liter', priceDelta: literDelta));
   }
 
   return [
@@ -160,6 +179,4 @@ const List<ModifierOption> mockAddOns = [
   ModifierOption(id: 'add_cream_cheese', groupId: 'addons', name: 'Cream Cheese', priceDelta: 15.0),
   ModifierOption(id: 'add_oreo', groupId: 'addons', name: 'Crushed Oreo', priceDelta: 15.0),
   ModifierOption(id: 'add_graham', groupId: 'addons', name: 'Crushed Graham', priceDelta: 15.0),
-  ModifierOption(id: 'add_foam', groupId: 'addons', name: 'Classic Foam', priceDelta: 15.0),
-  ModifierOption(id: 'add_pudding', groupId: 'addons', name: 'Egg Pudding', priceDelta: 15.0),
 ];

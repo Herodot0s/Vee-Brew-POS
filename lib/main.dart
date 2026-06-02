@@ -7,9 +7,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final container = ProviderContainer();
-  // Seeding disabled
-  // final db = container.read(databaseProvider);
-  // await db.seedInitialData();
+  final db = container.read(databaseProvider);
+  await db.seedInitialData();
 
   runApp(
     UncontrolledProviderScope(container: container, child: const VeebrewApp()),

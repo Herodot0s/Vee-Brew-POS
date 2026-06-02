@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/mock_analytics_provider.dart';
+import '../../providers/analytics_provider.dart';
+import '../../providers/analytics_state_provider.dart';
 import '../admin/metric_tile.dart';
 import 'components/top_products_card.dart';
 import 'components/payment_methods_card.dart';
@@ -11,10 +12,15 @@ import '../../theme/binance_theme.dart';
 class AnalyticsManagementView extends ConsumerWidget {
   const AnalyticsManagementView({super.key});
 
+  String _formatDateShort(DateTime dt) {
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Switch to real provider when backend logic is fully written.
-    final summaryAsync = ref.watch(mockAnalyticsProvider);
+    final summaryAsync = ref.watch(analyticsSummaryProvider);
+    final currentFilter = ref.watch(analyticsStateProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Analytics Command Center')),
@@ -25,11 +31,25 @@ class AnalyticsManagementView extends ConsumerWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Time Range: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(width: 8),
-                    const TimeRangeSelector(),
+                    Text(
+                      currentFilter.range == TimeRange.custom
+                          ? 'Range: ${_formatDateShort(currentFilter.startDate)} - ${_formatDateShort(currentFilter.endDate)}'
+                          : 'Preset: ${_formatDateShort(currentFilter.startDate)} - ${_formatDateShort(currentFilter.endDate)}',
+                      style: const TextStyle(
+                        color: BinanceTheme.muted,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('Time Range: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                        const SizedBox(width: 8),
+                        const TimeRangeSelector(),
+                      ],
+                    ),
                   ],
                 ),
               ),

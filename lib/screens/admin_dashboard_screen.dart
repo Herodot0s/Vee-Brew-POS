@@ -414,6 +414,7 @@ class _ModifierManagementView extends ConsumerWidget {
                               );
                         }
                       }
+                      if (!context.mounted) return;
                       Navigator.pop(context);
                     },
                     child: const Text('Save'),
@@ -473,6 +474,7 @@ class _ModifierManagementView extends ConsumerWidget {
                       ))
                     .go();
               }
+              if (!context.mounted) return;
               Navigator.pop(context);
             },
             child: const Text('Delete', style: TextStyle(color: Colors.white)),
@@ -739,6 +741,7 @@ class _ProductManagementView extends ConsumerWidget {
                         ),
                       );
                     }
+                    if (!context.mounted) return;
                     Navigator.pop(context);
                   },
                   child: const Text('Save'),
@@ -783,6 +786,7 @@ class _ProductManagementView extends ConsumerWidget {
               await (db.delete(
                 db.products,
               )..where((t) => t.id.equals(product.id))).go();
+              if (!context.mounted) return;
               Navigator.pop(context);
             },
             child: const Text('Delete', style: TextStyle(color: Colors.white)),
@@ -879,11 +883,10 @@ class _PerformanceStatsBar extends ConsumerWidget {
                       await db.delete(db.products).go();
                       await db.delete(db.categories).go();
                     });
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Database Wiped Fully')),
-                      );
-                    }
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Database Wiped Fully')),
+                    );
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                   child: const Text(
@@ -1019,7 +1022,8 @@ class _CategoryManagementView extends ConsumerWidget {
               await (db.delete(
                 db.categories,
               )..where((t) => t.id.equals(category.id))).go();
-              if (context.mounted) Navigator.pop(context);
+              if (!context.mounted) return;
+              Navigator.pop(context);
             },
             child: const Text('Delete', style: TextStyle(color: Colors.white)),
           ),
@@ -1074,7 +1078,8 @@ class _CategoryManagementView extends ConsumerWidget {
                       sortOrder: 0,
                     ),
                   );
-              if (context.mounted) Navigator.pop(context);
+              if (!context.mounted) return;
+              Navigator.pop(context);
             },
             child: const Text('Save'),
           ),

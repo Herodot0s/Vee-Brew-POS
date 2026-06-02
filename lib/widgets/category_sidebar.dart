@@ -66,54 +66,37 @@ class CategorySidebar extends ConsumerWidget {
                               )
                             : null,
                       ),
-                      child: Stack(
-                        children: [
-                          if (isSelected)
-                            Positioned(
-                              left: 0,
-                              top: 12,
-                              bottom: 12,
-                              width: 3,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: BinanceTheme.primary,
-                                  borderRadius: BorderRadius.circular(1.5),
-                                ),
-                              ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: BinanceTheme.spaceMd,
+                          horizontal: BinanceTheme.spaceLg,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              _getCategoryIcon(cat.name),
+                              color: isSelected
+                                  ? BinanceTheme.primary
+                                  : BinanceTheme.muted,
+                              size: 20,
                             ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: BinanceTheme.spaceMd,
-                              horizontal: BinanceTheme.spaceLg,
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.local_drink,
+                            const SizedBox(width: BinanceTheme.spaceSm),
+                            Expanded(
+                              child: Text(
+                                cat.name,
+                                style: BinanceTheme.titleStyle(
+                                  size: 14,
+                                  weight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
                                   color: isSelected
                                       ? BinanceTheme.onDark
                                       : BinanceTheme.muted,
-                                  size: 20,
                                 ),
-                                const SizedBox(width: BinanceTheme.spaceSm),
-                                Expanded(
-                                  child: Text(
-                                    cat.name,
-                                    style: BinanceTheme.titleStyle(
-                                      size: 14,
-                                      weight: isSelected
-                                          ? FontWeight.w600
-                                          : FontWeight.w400,
-                                      color: isSelected
-                                          ? BinanceTheme.onDark
-                                          : BinanceTheme.muted,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -152,4 +135,24 @@ class CategorySidebar extends ConsumerWidget {
       ),
     );
   }
+}
+
+IconData _getCategoryIcon(String categoryName) {
+  final name = categoryName.toLowerCase();
+  if (name.contains('coffee') || name.contains('espresso') || name.contains('latte') || name.contains('caffeine') || name.contains('cold brew')) {
+    return Icons.coffee;
+  }
+  if (name.contains('tea') || name.contains('matcha') || name.contains('tisane') || name.contains('chai')) {
+    return Icons.emoji_food_beverage;
+  }
+  if (name.contains('beer') || name.contains('brew') || name.contains('draft') || name.contains('alcohol') || name.contains('cider') || name.contains('stout') || name.contains('ipa') || name.contains('ale')) {
+    return Icons.sports_bar;
+  }
+  if (name.contains('pastry') || name.contains('bread') || name.contains('food') || name.contains('snack') || name.contains('cake') || name.contains('dessert') || name.contains('muffin') || name.contains('croissant')) {
+    return Icons.restaurant;
+  }
+  if (name.contains('juice') || name.contains('soda') || name.contains('cold') || name.contains('drink') || name.contains('beverage') || name.contains('water') || name.contains('milkshake')) {
+    return Icons.local_drink;
+  }
+  return Icons.coffee;
 }

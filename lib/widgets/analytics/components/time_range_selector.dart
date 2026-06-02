@@ -8,17 +8,46 @@ class TimeRangeSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentRange = ref.watch(analyticsStateProvider);
+    final currentFilter = ref.watch(analyticsStateProvider);
     return Row(
       children: TimeRange.values.map((range) {
-        final isSelected = range == currentRange;
+        final isSelected = range == currentFilter.range;
         return Padding(
           padding: const EdgeInsets.only(right: BinanceTheme.spaceXs),
           child: ChoiceChip(
             label: Text(range.name.capitalize()),
             selected: isSelected,
-            onSelected: (_) =>
-                ref.read(analyticsStateProvider.notifier).setTimeRange(range),
+            onSelected: (_) async {
+              if (range == TimeRange.custom) {
+                final picked = await showDateRangePicker(
+                  context: context,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                  initialDateRange: DateTimeRange(
+                    start: currentFilter.startDate,
+                    end: currentFilter.endDate,
+                  ),
+                  builder: (context, child) {
+                    return Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: const ColorScheme.dark(
+                          primary: BinanceTheme.primary,
+                          onPrimary: BinanceTheme.onPrimary,
+                          surface: BinanceTheme.surfaceCardDark,
+                          onSurface: BinanceTheme.onDark,
+                        ),
+                      ),
+                      child: child!,
+                    );
+                  },
+                );
+                if (picked != null) {
+                  ref.read(analyticsStateProvider.notifier).setCustomRange(picked.start, picked.end);
+                }
+              } else {
+                ref.read(analyticsStateProvider.notifier).setTimeRange(range);
+              }
+            },
           ),
         );
       }).toList(),

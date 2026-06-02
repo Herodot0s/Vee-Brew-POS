@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart';
 import '../database/drift_database.dart';
@@ -99,15 +98,16 @@ final adminFilteredProductsProvider = StreamProvider<List<Product>>((ref) {
   final catId = ref.watch(adminSelectedCategoryProvider);
 
   return (db.select(db.products)..where((t) {
-    Expression<bool> predicate = const Constant(true);
-    if (query.isNotEmpty) {
-      predicate = predicate & t.name.lower().like('%$query%');
-    }
-    if (catId != null) {
-      predicate = predicate & t.categoryId.equals(catId);
-    }
-    return predicate;
-  })).watch();
+        Expression<bool> predicate = const Constant(true);
+        if (query.isNotEmpty) {
+          predicate = predicate & t.name.lower().like('%$query%');
+        }
+        if (catId != null) {
+          predicate = predicate & t.categoryId.equals(catId);
+        }
+        return predicate;
+      }))
+      .watch();
 });
 
 // Admin Modifier Filtering
@@ -133,19 +133,78 @@ class AdminSelectedModifierGroup extends Notifier<String?> {
   set value(String? v) => state = v;
 }
 
-final adminFilteredModifiersProvider = StreamProvider<List<Modifier>>((ref) {
-  final db = ref.watch(databaseProvider);
-  final query = ref.watch(adminModifierSearchQueryProvider).toLowerCase();
-  final groupId = ref.watch(adminSelectedModifierGroupProvider);
+class ModifierWithProduct {
+  final Modifier modifier;
+  final Product? product;
+  final int productCount;
 
-  return (db.select(db.modifiers)..where((t) {
-    Expression<bool> predicate = const Constant(true);
-    if (query.isNotEmpty) {
-      predicate = predicate & t.name.lower().like('%$query%');
-    }
-    if (groupId != null) {
-      predicate = predicate & t.groupName.equals(groupId);
-    }
-    return predicate;
-  })).watch();
-});
+  const ModifierWithProduct({
+    required this.modifier,
+    this.product,
+    this.productCount = 1,
+  });
+}
+
+final adminFilteredModifiersProvider =
+    StreamProvider<List<ModifierWithProduct>>((ref) {
+      final db = ref.watch(databaseProvider);
+      final query = ref.watch(adminModifierSearchQueryProvider).toLowerCase();
+      final groupId = ref.watch(adminSelectedModifierGroupProvider);
+
+      final queryBuilder = db.select(db.modifiers).join([
+        leftOuterJoin(
+          db.products,
+          db.products.id.equalsExp(db.modifiers.productId),
+        ),
+      ]);
+
+      Expression<bool> predicate = const Constant(true);
+      if (query.isNotEmpty) {
+        predicate =
+            predicate &
+            (db.modifiers.name.lower().like('%$query%') |
+                db.products.name.lower().like('%$query%'));
+      }
+      if (groupId != null) {
+        predicate = predicate & db.modifiers.groupName.equals(groupId);
+      }
+
+      queryBuilder.where(predicate);
+      queryBuilder.orderBy([
+        OrderingTerm(expression: db.modifiers.groupName),
+        OrderingTerm(expression: db.modifiers.name),
+        OrderingTerm(expression: db.modifiers.priceDelta),
+      ]);
+
+      return queryBuilder.watch().map((rows) {
+        final groupedRows = <String, List<ModifierWithProduct>>{};
+
+        for (final row in rows) {
+          final modifier = row.readTable(db.modifiers);
+          final key = [
+            modifier.id,
+            modifier.groupName,
+            modifier.name,
+            modifier.priceDelta,
+          ].join('\u0000');
+
+          groupedRows
+              .putIfAbsent(key, () => [])
+              .add(
+                ModifierWithProduct(
+                  modifier: modifier,
+                  product: row.readTableOrNull(db.products),
+                ),
+              );
+        }
+
+        return groupedRows.values.map((group) {
+          final first = group.first;
+          return ModifierWithProduct(
+            modifier: first.modifier,
+            product: group.length == 1 ? first.product : null,
+            productCount: group.length,
+          );
+        }).toList();
+      });
+    });

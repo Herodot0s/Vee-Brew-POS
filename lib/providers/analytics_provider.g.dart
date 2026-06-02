@@ -46,4 +46,4 @@ final class AnalyticsSummaryProvider
   }
 }
 
-String _$analyticsSummaryHash() => r'fbf7e18d9d5ccf73f485fd7e658fdab10c2ef451';
+String _$analyticsSummaryHash() => r'16d57014bc22499e4e35593b6845991d9e0c0d82';

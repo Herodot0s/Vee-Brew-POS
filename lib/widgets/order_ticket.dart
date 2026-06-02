@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/cart_provider.dart';
-import '../providers/checkout_provider.dart';
 import '../theme/binance_theme.dart';
 import 'checkout_modal.dart';
+import 'modifier_bottom_sheet.dart';
 
 class OrderTicket extends ConsumerWidget {
   const OrderTicket({super.key});
@@ -38,32 +38,87 @@ class OrderTicket extends ConsumerWidget {
                 final modsText = item.selectedModifiers
                     .map((m) => m.name)
                     .join(', ');
-                return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: BinanceTheme.spaceLg,
-                    vertical: BinanceTheme.spaceXs,
-                  ),
-                  title: Text(
-                    item.product.name,
-                    style: BinanceTheme.titleStyle(
-                      size: 14,
-                      color: BinanceTheme.body,
+                return Material(
+                  color: Colors.transparent,
+                  child: ListTile(
+                    onTap: () {
+                      ModifierBottomSheet.show(
+                        context,
+                        item.product,
+                        editIndex: index,
+                        editItem: item,
+                      );
+                    },
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: BinanceTheme.spaceLg,
+                      vertical: BinanceTheme.spaceXs,
                     ),
-                  ),
-                  subtitle: modsText.isNotEmpty
-                      ? Text(
-                          modsText,
-                          style: BinanceTheme.titleStyle(
-                            size: 12,
-                            color: BinanceTheme.muted,
+                    title: Text(
+                      item.product.name,
+                      style: BinanceTheme.titleStyle(
+                        size: 14,
+                        color: BinanceTheme.body,
+                      ),
+                    ),
+                    subtitle: modsText.isNotEmpty
+                        ? Text(
+                            modsText,
+                            style: BinanceTheme.titleStyle(
+                              size: 12,
+                              color: BinanceTheme.muted,
+                            ),
+                          )
+                        : null,
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '₱${item.calculatedPrice.toStringAsFixed(2)}',
+                          style: BinanceTheme.numberStyle(
+                            size: 14,
+                            color: BinanceTheme.body,
                           ),
-                        )
-                      : null,
-                  trailing: Text(
-                    '₱${item.calculatedPrice.toStringAsFixed(2)}',
-                    style: BinanceTheme.numberStyle(
-                      size: 14,
-                      color: BinanceTheme.body,
+                        ),
+                        const SizedBox(width: BinanceTheme.spaceMd),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: BinanceTheme.tradingDown,
+                            size: 20,
+                          ),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          onPressed: () {
+                            cartNotifier.removeItem(index);
+                            ScaffoldMessenger.of(context).clearSnackBars();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Item removed from ticket',
+                                  style: BinanceTheme.titleStyle(color: Colors.white),
+                                ),
+                                action: SnackBarAction(
+                                  label: 'UNDO',
+                                  textColor: BinanceTheme.primary,
+                                  onPressed: () {
+                                    cartNotifier.undoDelete();
+                                  },
+                                ),
+                                backgroundColor: BinanceTheme.surfaceCardDark,
+                                duration: const Duration(seconds: 4),
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BinanceTheme.roundedMd,
+                                  side: const BorderSide(
+                                    color: BinanceTheme.surfaceElevatedDark,
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 );

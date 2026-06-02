@@ -3,11 +3,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:veebrew/models/product.dart';
 import 'package:veebrew/widgets/modifier_bottom_sheet.dart';
+import 'package:veebrew/database/drift_database.dart' hide Product;
+import 'package:veebrew/providers/database_provider.dart';
 
 void main() {
   testWidgets(
     'ModifierBottomSheet shows options and updates calculated price',
     (tester) async {
+      final db = AppDatabase.memory();
+      await db.seedInitialData();
+
       const product = Product(
         id: 'mt_wintermelon',
         name: 'Wintermelon Milk Tea',
@@ -17,6 +22,9 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
+          overrides: [
+            databaseProvider.overrideWithValue(db),
+          ],
           child: MaterialApp(
             home: Scaffold(
               body: Builder(
@@ -46,6 +54,9 @@ void main() {
 
       // Verify calculated price update in footer action button
       expect(find.text('₱38.00'), findsOneWidget);
+
+      await db.close();
+      await tester.pumpAndSettle();
     },
   );
 }
