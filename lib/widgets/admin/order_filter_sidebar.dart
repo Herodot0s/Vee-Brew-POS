@@ -8,18 +8,38 @@ class OrderFilterSidebar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final activeFilter = ref.watch(adminOrderFilterProvider);
+    final isCustomSelected = activeFilter.label == 'Custom';
+
     return Container(
       width: 200,
       color: BinanceTheme.surfaceElevatedDark,
       child: Column(
         children: [
-          _filterButton(context, ref, 'Today', _getTodayRange()),
-          _filterButton(context, ref, 'This Week', _getWeekRange()),
-          _filterButton(context, ref, 'This Month', _getMonthRange()),
-          _filterButton(context, ref, 'This Year', _getYearRange()),
+          _FilterButton(
+            label: 'Today',
+            range: AdminOrderFilterNotifier.getTodayRange(),
+          ),
+          _FilterButton(
+            label: 'This Week',
+            range: AdminOrderFilterNotifier.getWeekRange(),
+          ),
+          _FilterButton(
+            label: 'This Month',
+            range: AdminOrderFilterNotifier.getMonthRange(),
+          ),
+          _FilterButton(
+            label: 'This Year',
+            range: AdminOrderFilterNotifier.getYearRange(),
+          ),
           const Divider(color: BinanceTheme.surfaceCardDark),
           ListTile(
-            title: const Text('Custom Range', style: TextStyle(color: BinanceTheme.primary)),
+            title: Text(
+              'Custom Range',
+              style: BinanceTheme.titleStyle(
+                color: isCustomSelected ? BinanceTheme.primary : BinanceTheme.onDark,
+              ),
+            ),
             onTap: () async {
               final range = await showDateRangePicker(
                 context: context,
@@ -38,39 +58,25 @@ class OrderFilterSidebar extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _filterButton(BuildContext context, WidgetRef ref, String label, AdminOrderFilter range) {
+class _FilterButton extends ConsumerWidget {
+  final String label;
+  final AdminOrderFilter range;
+
+  const _FilterButton({required this.label, required this.range});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final isSelected = ref.watch(adminOrderFilterProvider).label == label;
     return ListTile(
-      title: Text(label, style: TextStyle(color: isSelected ? BinanceTheme.primary : BinanceTheme.onDark)),
+      title: Text(
+        label,
+        style: BinanceTheme.titleStyle(
+          color: isSelected ? BinanceTheme.primary : BinanceTheme.onDark,
+        ),
+      ),
       onTap: () => ref.read(adminOrderFilterProvider.notifier).state = range,
     );
-  }
-
-  AdminOrderFilter _getTodayRange() {
-    final now = DateTime.now();
-    final start = DateTime(now.year, now.month, now.day);
-    return AdminOrderFilter(start: start, end: start.add(const Duration(days: 1)), label: 'Today');
-  }
-
-  AdminOrderFilter _getWeekRange() {
-    final now = DateTime.now();
-    final start = now.subtract(Duration(days: now.weekday - 1));
-    final startDay = DateTime(start.year, start.month, start.day);
-    return AdminOrderFilter(start: startDay, end: startDay.add(const Duration(days: 7)), label: 'This Week');
-  }
-
-  AdminOrderFilter _getMonthRange() {
-    final now = DateTime.now();
-    final start = DateTime(now.year, now.month, 1);
-    final end = DateTime(now.year, now.month + 1, 1);
-    return AdminOrderFilter(start: start, end: end, label: 'This Month');
-  }
-
-  AdminOrderFilter _getYearRange() {
-    final now = DateTime.now();
-    final start = DateTime(now.year, 1, 1);
-    final end = DateTime(now.year + 1, 1, 1);
-    return AdminOrderFilter(start: start, end: end, label: 'This Year');
   }
 }

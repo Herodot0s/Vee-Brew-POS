@@ -64,7 +64,7 @@ final orderItemsProvider = FutureProvider.family<List<OrderItem>, int>((
   ref,
   orderId,
 ) {
-  final db = ref.read(databaseProvider);
+  final db = ref.watch(databaseProvider);
   return (db.select(
     db.orderItems,
   )..where((t) => t.orderId.equals(orderId))).get();
@@ -121,22 +121,78 @@ class AdminOrderFilter {
   final DateTime end;
   final String label;
 
-  AdminOrderFilter({
+  const AdminOrderFilter({
     required this.start,
     required this.end,
     this.label = 'Custom',
   });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AdminOrderFilter &&
+          start == other.start &&
+          end == other.end &&
+          label == other.label;
+
+  @override
+  int get hashCode => start.hashCode ^ end.hashCode ^ label.hashCode;
 }
 
-final adminOrderFilterProvider = StateProvider<AdminOrderFilter>((ref) {
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  return AdminOrderFilter(
-    start: today,
-    end: today.add(const Duration(days: 1)),
-    label: 'Today',
-  );
-});
+class AdminOrderFilterNotifier extends Notifier<AdminOrderFilter> {
+  @override
+  AdminOrderFilter build() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    return AdminOrderFilter(
+      start: today,
+      end: today.add(const Duration(days: 1)),
+      label: 'Today',
+    );
+  }
+
+  set value(AdminOrderFilter v) => state = v;
+
+  static AdminOrderFilter getTodayRange() {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day);
+    return AdminOrderFilter(
+      start: start,
+      end: start.add(const Duration(days: 1)),
+      label: 'Today',
+    );
+  }
+
+  static AdminOrderFilter getWeekRange() {
+    final now = DateTime.now();
+    final start = now.subtract(Duration(days: now.weekday - 1));
+    final startDay = DateTime(start.year, start.month, start.day);
+    return AdminOrderFilter(
+      start: startDay,
+      end: startDay.add(const Duration(days: 7)),
+      label: 'This Week',
+    );
+  }
+
+  static AdminOrderFilter getMonthRange() {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, 1);
+    final end = DateTime(now.year, now.month + 1, 1);
+    return AdminOrderFilter(start: start, end: end, label: 'This Month');
+  }
+
+  static AdminOrderFilter getYearRange() {
+    final now = DateTime.now();
+    final start = DateTime(now.year, 1, 1);
+    final end = DateTime(now.year + 1, 1, 1);
+    return AdminOrderFilter(start: start, end: end, label: 'This Year');
+  }
+}
+
+final adminOrderFilterProvider =
+    NotifierProvider<AdminOrderFilterNotifier, AdminOrderFilter>(
+      () => AdminOrderFilterNotifier(),
+    );
 
 final filteredOrdersStreamProvider = StreamProvider<List<Order>>((ref) {
   final filter = ref.watch(adminOrderFilterProvider);
