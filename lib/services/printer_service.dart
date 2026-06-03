@@ -1,21 +1,35 @@
-import 'package:blue_thermal_printer/blue_thermal_printer.dart';
+import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
 class PrinterService {
-  final BlueThermalPrinter bluetooth = BlueThermalPrinter.instance;
-
-  Future<List<BluetoothDevice>> getDevices() async {
-    return await bluetooth.getBondedDevices();
+  Future<List<BluetoothInfo>> getDevices() async {
+    try {
+      return await PrintBluetoothThermal.pairedBluetooths;
+    } catch (e) {
+      return [];
+    }
   }
 
-  Future<void> connect(BluetoothDevice device) async {
-    await bluetooth.connect(device);
+  Future<bool> connect(String address) async {
+    try {
+      return await PrintBluetoothThermal.connect(macPrinterAddress: address);
+    } catch (e) {
+      return false;
+    }
   }
 
-  Future<void> disconnect() async {
-    await bluetooth.disconnect();
+  Future<bool> disconnect() async {
+    try {
+      return await PrintBluetoothThermal.disconnect;
+    } catch (e) {
+      return false;
+    }
   }
 
-  Future<bool?> isConnected() async {
-    return await bluetooth.isConnected;
+  Future<bool> isConnected() async {
+    try {
+      return await PrintBluetoothThermal.connectionStatus;
+    } catch (e) {
+      return false;
+    }
   }
 }

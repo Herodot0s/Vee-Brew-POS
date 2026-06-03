@@ -1,6 +1,9 @@
-import 'package:blue_thermal_printer/blue_thermal_printer.dart';
+import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:io' show Platform;
+import '../models/order_item.dart';
 import '../providers/cart_provider.dart';
 import '../providers/checkout_provider.dart';
 import '../services/printer_service.dart';
@@ -69,7 +72,7 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
   }
 
   void _showPrintOption(BuildContext context, String orderNumber,
-      List<dynamic> items, double total) {
+      List<OrderItem> items, double total) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -96,35 +99,45 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
             child: Text('Done',
                 style: BinanceTheme.titleStyle(color: BinanceTheme.muted)),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: BinanceTheme.primary,
-              foregroundColor: Colors.black,
+          if (!kIsWeb && (Platform.isAndroid || Platform.isIOS))
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: BinanceTheme.primary,
+                foregroundColor: Colors.black,
+              ),
+              onPressed: () async {
+                try {
+                  final isConnected = await _printerService.isConnected();
+                  if (isConnected) {
+                    final bytes = await ReceiptGenerator.generateBytes(
+                        orderNumber, items, total);
+                    await PrintBluetoothThermal.writeBytes(bytes);
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                    }
+                  } else {
+                    if (context.mounted) {
+                      _showPrinterSelection(context, orderNumber, items, total);
+                    }
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Print Error: $e')),
+                    );
+                  }
+                }
+              },
+              child: const Text('Print Receipt'),
             ),
-            onPressed: () async {
-              final isConnected = await _printerService.isConnected() ?? false;
-              if (isConnected) {
-                await ReceiptGenerator.generate(
-                    _printerService.bluetooth, orderNumber, items.cast(), total);
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop();
-                }
-              } else {
-                if (context.mounted) {
-                  _showPrinterSelection(context, orderNumber, items, total);
-                }
-              }
-            },
-            child: const Text('Print Receipt'),
-          ),
         ],
       ),
     );
   }
 
   void _showPrinterSelection(BuildContext context, String orderNumber,
-      List<dynamic> items, double total) async {
+      List<OrderItem> items, double total) async {
     final devices = await _printerService.getDevices();
 
     if (!context.mounted) return;
@@ -138,7 +151,7 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
         content: SizedBox(
           width: 300,
           child: devices.isEmpty
-              ? Text('No bonded Bluetooth printers found.',
+              ? Text('No paired Bluetooth printers found.',
                   style: BinanceTheme.titleStyle(color: BinanceTheme.muted))
               : ListView.builder(
                   shrinkWrap: true,
@@ -146,23 +159,29 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
                   itemBuilder: (context, index) {
                     final device = devices[index];
                     return ListTile(
-                      title: Text(device.name ?? 'Unknown Device',
+                      title: Text(device.name,
                           style: BinanceTheme.titleStyle(color: Colors.white)),
-                      subtitle: Text(device.address ?? '',
+                      subtitle: Text(device.macAdress,
                           style: BinanceTheme.titleStyle(
                               color: BinanceTheme.muted, size: 12)),
                       onTap: () async {
                         try {
-                          await _printerService.connect(device);
-                          await ReceiptGenerator.generate(
-                              _printerService.bluetooth,
-                              orderNumber,
-                              items.cast(),
-                              total);
-                          if (context.mounted) {
-                            Navigator.of(context).pop(); // Printer selection
-                            Navigator.of(context).pop(); // Success dialog
-                            Navigator.of(context).pop(); // Modal
+                          final connected = await _printerService.connect(device.macAdress);
+                          if (connected) {
+                            final bytes = await ReceiptGenerator.generateBytes(
+                                orderNumber, items, total);
+                            await PrintBluetoothThermal.writeBytes(bytes);
+                            if (context.mounted) {
+                              Navigator.of(context).pop(); // Printer selection
+                              Navigator.of(context).pop(); // Success dialog
+                              Navigator.of(context).pop(); // Modal
+                            }
+                          } else {
+                             if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Could not connect to printer')),
+                              );
+                            }
                           }
                         } catch (e) {
                           if (context.mounted) {
