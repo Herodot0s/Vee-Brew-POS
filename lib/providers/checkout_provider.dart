@@ -17,7 +17,7 @@ class CheckoutService {
   final Ref _ref;
   CheckoutService(this._ref);
 
-  Future<void> processCheckout(String paymentMethod) async {
+  Future<String> processCheckout(String paymentMethod) async {
     if (!['Cash', 'Card', 'GCash'].contains(paymentMethod)) {
       throw Exception('Unsupported payment method: $paymentMethod');
     }
@@ -26,28 +26,28 @@ class CheckoutService {
     final cartItems = _ref.read(cartProvider);
     final total = _ref.read(cartTotalProvider);
 
-    if (cartItems.isEmpty) return;
+    if (cartItems.isEmpty) throw Exception('Cart is empty');
 
     final stopwatch = Stopwatch()..start();
     final now = DateTime.now();
     final datePrefix =
         '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
 
-    await db.transaction(() async {
+    final String orderNumber = await db.transaction(() async {
       // Daily sequence number
       final todayStart = DateTime(now.year, now.month, now.day);
       final todayOrders = await (db.select(
         db.orders,
       )..where((t) => t.createdAt.isBiggerOrEqualValue(todayStart))).get();
       final seqNum = (todayOrders.length + 1).toString().padLeft(3, '0');
-      final orderNumber = '$datePrefix-$seqNum';
+      final on = '$datePrefix-$seqNum';
 
       // Insert order
       final orderId = await db
           .into(db.orders)
           .insert(
             OrdersCompanion.insert(
-              orderNumber: orderNumber,
+              orderNumber: on,
               totalAmount: total,
               paymentMethod: paymentMethod,
               createdAt: now,
@@ -77,6 +77,7 @@ class CheckoutService {
               ),
             );
       }
+      return on;
     });
 
     stopwatch.stop();
@@ -86,5 +87,7 @@ class CheckoutService {
 
     // Clear cart after successful save
     _ref.read(cartProvider.notifier).clearCart();
+
+    return orderNumber;
   }
 }

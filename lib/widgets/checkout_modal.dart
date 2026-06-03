@@ -1,7 +1,10 @@
+import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/cart_provider.dart';
 import '../providers/checkout_provider.dart';
+import '../services/printer_service.dart';
+import '../services/receipt_generator.dart';
 import '../theme/binance_theme.dart';
 import 'checkout/gcash_payment_view.dart';
 
@@ -17,12 +20,16 @@ class CheckoutModal extends ConsumerStatefulWidget {
 class _CheckoutModalState extends ConsumerState<CheckoutModal> {
   bool _isProcessing = false;
   CheckoutStep _step = CheckoutStep.methodSelection;
+  final _printerService = PrinterService();
 
   Future<void> _handlePayment(String method) async {
     setState(() => _isProcessing = true);
 
     try {
-      await ref.read(checkoutServiceProvider).processCheckout(method);
+      final cartSnapshot = ref.read(cartProvider);
+      final total = ref.read(cartTotalProvider);
+      final orderNumber =
+          await ref.read(checkoutServiceProvider).processCheckout(method);
 
       if (!mounted) return;
 
@@ -34,7 +41,7 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Payment Successful — $method',
+            'Payment Successful — $orderNumber',
             style: BinanceTheme.titleStyle(color: Colors.white),
           ),
           backgroundColor: BinanceTheme.tradingUp,
@@ -43,15 +50,15 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
         ),
       );
 
-      Navigator.of(context).pop();
-    } on Exception catch (_) {
+      _showPrintOption(context, orderNumber, cartSnapshot, total);
+    } on Exception catch (e) {
       if (!mounted) return;
       setState(() => _isProcessing = false);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Payment failed. Try again.',
+            'Payment failed: $e',
             style: BinanceTheme.titleStyle(color: Colors.white),
           ),
           backgroundColor: BinanceTheme.tradingDown,
@@ -59,6 +66,118 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
         ),
       );
     }
+  }
+
+  void _showPrintOption(BuildContext context, String orderNumber,
+      List<dynamic> items, double total) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: BinanceTheme.surfaceCardDark,
+        title: Text('Checkout Complete',
+            style: BinanceTheme.titleStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Order $orderNumber processed successfully.',
+                style: BinanceTheme.titleStyle(color: BinanceTheme.muted)),
+            const SizedBox(height: BinanceTheme.spaceLg),
+            const Icon(Icons.check_circle_outline,
+                color: BinanceTheme.tradingUp, size: 64),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Dialog
+              Navigator.of(context).pop(); // Modal
+            },
+            child: Text('Done',
+                style: BinanceTheme.titleStyle(color: BinanceTheme.muted)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: BinanceTheme.primary,
+              foregroundColor: Colors.black,
+            ),
+            onPressed: () async {
+              final isConnected = await _printerService.isConnected() ?? false;
+              if (isConnected) {
+                await ReceiptGenerator.generate(
+                    _printerService.bluetooth, orderNumber, items.cast(), total);
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                }
+              } else {
+                if (context.mounted) {
+                  _showPrinterSelection(context, orderNumber, items, total);
+                }
+              }
+            },
+            child: const Text('Print Receipt'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPrinterSelection(BuildContext context, String orderNumber,
+      List<dynamic> items, double total) async {
+    final devices = await _printerService.getDevices();
+
+    if (!context.mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: BinanceTheme.surfaceCardDark,
+        title: Text('Select Printer',
+            style: BinanceTheme.titleStyle(color: Colors.white)),
+        content: SizedBox(
+          width: 300,
+          child: devices.isEmpty
+              ? Text('No bonded Bluetooth printers found.',
+                  style: BinanceTheme.titleStyle(color: BinanceTheme.muted))
+              : ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: devices.length,
+                  itemBuilder: (context, index) {
+                    final device = devices[index];
+                    return ListTile(
+                      title: Text(device.name ?? 'Unknown Device',
+                          style: BinanceTheme.titleStyle(color: Colors.white)),
+                      subtitle: Text(device.address ?? '',
+                          style: BinanceTheme.titleStyle(
+                              color: BinanceTheme.muted, size: 12)),
+                      onTap: () async {
+                        try {
+                          await _printerService.connect(device);
+                          await ReceiptGenerator.generate(
+                              _printerService.bluetooth,
+                              orderNumber,
+                              items.cast(),
+                              total);
+                          if (context.mounted) {
+                            Navigator.of(context).pop(); // Printer selection
+                            Navigator.of(context).pop(); // Success dialog
+                            Navigator.of(context).pop(); // Modal
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Printer Error: $e')),
+                            );
+                          }
+                        }
+                      },
+                    );
+                  },
+                ),
+        ),
+      ),
+    );
   }
 
   Widget _buildMethodSelection(double total, int cartLength) {
