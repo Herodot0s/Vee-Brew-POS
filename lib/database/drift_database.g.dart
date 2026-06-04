@@ -1068,6 +1068,28 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _amountReceivedMeta = const VerificationMeta(
+    'amountReceived',
+  );
+  @override
+  late final GeneratedColumn<double> amountReceived = GeneratedColumn<double>(
+    'amount_received',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _changeAmountMeta = const VerificationMeta(
+    'changeAmount',
+  );
+  @override
+  late final GeneratedColumn<double> changeAmount = GeneratedColumn<double>(
+    'change_amount',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1076,6 +1098,8 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
     paymentMethod,
     createdAt,
     isSynced,
+    amountReceived,
+    changeAmount,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1139,6 +1163,24 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
         isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta),
       );
     }
+    if (data.containsKey('amount_received')) {
+      context.handle(
+        _amountReceivedMeta,
+        amountReceived.isAcceptableOrUnknown(
+          data['amount_received']!,
+          _amountReceivedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('change_amount')) {
+      context.handle(
+        _changeAmountMeta,
+        changeAmount.isAcceptableOrUnknown(
+          data['change_amount']!,
+          _changeAmountMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1172,6 +1214,14 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_synced'],
       )!,
+      amountReceived: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount_received'],
+      ),
+      changeAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}change_amount'],
+      ),
     );
   }
 
@@ -1188,6 +1238,8 @@ class Order extends DataClass implements Insertable<Order> {
   final String paymentMethod;
   final DateTime createdAt;
   final bool isSynced;
+  final double? amountReceived;
+  final double? changeAmount;
   const Order({
     required this.id,
     required this.orderNumber,
@@ -1195,6 +1247,8 @@ class Order extends DataClass implements Insertable<Order> {
     required this.paymentMethod,
     required this.createdAt,
     required this.isSynced,
+    this.amountReceived,
+    this.changeAmount,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1205,6 +1259,12 @@ class Order extends DataClass implements Insertable<Order> {
     map['payment_method'] = Variable<String>(paymentMethod);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['is_synced'] = Variable<bool>(isSynced);
+    if (!nullToAbsent || amountReceived != null) {
+      map['amount_received'] = Variable<double>(amountReceived);
+    }
+    if (!nullToAbsent || changeAmount != null) {
+      map['change_amount'] = Variable<double>(changeAmount);
+    }
     return map;
   }
 
@@ -1216,6 +1276,12 @@ class Order extends DataClass implements Insertable<Order> {
       paymentMethod: Value(paymentMethod),
       createdAt: Value(createdAt),
       isSynced: Value(isSynced),
+      amountReceived: amountReceived == null && nullToAbsent
+          ? const Value.absent()
+          : Value(amountReceived),
+      changeAmount: changeAmount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(changeAmount),
     );
   }
 
@@ -1231,6 +1297,8 @@ class Order extends DataClass implements Insertable<Order> {
       paymentMethod: serializer.fromJson<String>(json['paymentMethod']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       isSynced: serializer.fromJson<bool>(json['isSynced']),
+      amountReceived: serializer.fromJson<double?>(json['amountReceived']),
+      changeAmount: serializer.fromJson<double?>(json['changeAmount']),
     );
   }
   @override
@@ -1243,6 +1311,8 @@ class Order extends DataClass implements Insertable<Order> {
       'paymentMethod': serializer.toJson<String>(paymentMethod),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'isSynced': serializer.toJson<bool>(isSynced),
+      'amountReceived': serializer.toJson<double?>(amountReceived),
+      'changeAmount': serializer.toJson<double?>(changeAmount),
     };
   }
 
@@ -1253,6 +1323,8 @@ class Order extends DataClass implements Insertable<Order> {
     String? paymentMethod,
     DateTime? createdAt,
     bool? isSynced,
+    Value<double?> amountReceived = const Value.absent(),
+    Value<double?> changeAmount = const Value.absent(),
   }) => Order(
     id: id ?? this.id,
     orderNumber: orderNumber ?? this.orderNumber,
@@ -1260,6 +1332,10 @@ class Order extends DataClass implements Insertable<Order> {
     paymentMethod: paymentMethod ?? this.paymentMethod,
     createdAt: createdAt ?? this.createdAt,
     isSynced: isSynced ?? this.isSynced,
+    amountReceived: amountReceived.present
+        ? amountReceived.value
+        : this.amountReceived,
+    changeAmount: changeAmount.present ? changeAmount.value : this.changeAmount,
   );
   Order copyWithCompanion(OrdersCompanion data) {
     return Order(
@@ -1275,6 +1351,12 @@ class Order extends DataClass implements Insertable<Order> {
           : this.paymentMethod,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
+      amountReceived: data.amountReceived.present
+          ? data.amountReceived.value
+          : this.amountReceived,
+      changeAmount: data.changeAmount.present
+          ? data.changeAmount.value
+          : this.changeAmount,
     );
   }
 
@@ -1286,7 +1368,9 @@ class Order extends DataClass implements Insertable<Order> {
           ..write('totalAmount: $totalAmount, ')
           ..write('paymentMethod: $paymentMethod, ')
           ..write('createdAt: $createdAt, ')
-          ..write('isSynced: $isSynced')
+          ..write('isSynced: $isSynced, ')
+          ..write('amountReceived: $amountReceived, ')
+          ..write('changeAmount: $changeAmount')
           ..write(')'))
         .toString();
   }
@@ -1299,6 +1383,8 @@ class Order extends DataClass implements Insertable<Order> {
     paymentMethod,
     createdAt,
     isSynced,
+    amountReceived,
+    changeAmount,
   );
   @override
   bool operator ==(Object other) =>
@@ -1309,7 +1395,9 @@ class Order extends DataClass implements Insertable<Order> {
           other.totalAmount == this.totalAmount &&
           other.paymentMethod == this.paymentMethod &&
           other.createdAt == this.createdAt &&
-          other.isSynced == this.isSynced);
+          other.isSynced == this.isSynced &&
+          other.amountReceived == this.amountReceived &&
+          other.changeAmount == this.changeAmount);
 }
 
 class OrdersCompanion extends UpdateCompanion<Order> {
@@ -1319,6 +1407,8 @@ class OrdersCompanion extends UpdateCompanion<Order> {
   final Value<String> paymentMethod;
   final Value<DateTime> createdAt;
   final Value<bool> isSynced;
+  final Value<double?> amountReceived;
+  final Value<double?> changeAmount;
   const OrdersCompanion({
     this.id = const Value.absent(),
     this.orderNumber = const Value.absent(),
@@ -1326,6 +1416,8 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     this.paymentMethod = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.isSynced = const Value.absent(),
+    this.amountReceived = const Value.absent(),
+    this.changeAmount = const Value.absent(),
   });
   OrdersCompanion.insert({
     this.id = const Value.absent(),
@@ -1334,6 +1426,8 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     required String paymentMethod,
     required DateTime createdAt,
     this.isSynced = const Value.absent(),
+    this.amountReceived = const Value.absent(),
+    this.changeAmount = const Value.absent(),
   }) : orderNumber = Value(orderNumber),
        totalAmount = Value(totalAmount),
        paymentMethod = Value(paymentMethod),
@@ -1345,6 +1439,8 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     Expression<String>? paymentMethod,
     Expression<DateTime>? createdAt,
     Expression<bool>? isSynced,
+    Expression<double>? amountReceived,
+    Expression<double>? changeAmount,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1353,6 +1449,8 @@ class OrdersCompanion extends UpdateCompanion<Order> {
       if (paymentMethod != null) 'payment_method': paymentMethod,
       if (createdAt != null) 'created_at': createdAt,
       if (isSynced != null) 'is_synced': isSynced,
+      if (amountReceived != null) 'amount_received': amountReceived,
+      if (changeAmount != null) 'change_amount': changeAmount,
     });
   }
 
@@ -1363,6 +1461,8 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     Value<String>? paymentMethod,
     Value<DateTime>? createdAt,
     Value<bool>? isSynced,
+    Value<double?>? amountReceived,
+    Value<double?>? changeAmount,
   }) {
     return OrdersCompanion(
       id: id ?? this.id,
@@ -1371,6 +1471,8 @@ class OrdersCompanion extends UpdateCompanion<Order> {
       paymentMethod: paymentMethod ?? this.paymentMethod,
       createdAt: createdAt ?? this.createdAt,
       isSynced: isSynced ?? this.isSynced,
+      amountReceived: amountReceived ?? this.amountReceived,
+      changeAmount: changeAmount ?? this.changeAmount,
     );
   }
 
@@ -1395,6 +1497,12 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     if (isSynced.present) {
       map['is_synced'] = Variable<bool>(isSynced.value);
     }
+    if (amountReceived.present) {
+      map['amount_received'] = Variable<double>(amountReceived.value);
+    }
+    if (changeAmount.present) {
+      map['change_amount'] = Variable<double>(changeAmount.value);
+    }
     return map;
   }
 
@@ -1406,7 +1514,9 @@ class OrdersCompanion extends UpdateCompanion<Order> {
           ..write('totalAmount: $totalAmount, ')
           ..write('paymentMethod: $paymentMethod, ')
           ..write('createdAt: $createdAt, ')
-          ..write('isSynced: $isSynced')
+          ..write('isSynced: $isSynced, ')
+          ..write('amountReceived: $amountReceived, ')
+          ..write('changeAmount: $changeAmount')
           ..write(')'))
         .toString();
   }
@@ -2963,6 +3073,8 @@ typedef $$OrdersTableCreateCompanionBuilder =
       required String paymentMethod,
       required DateTime createdAt,
       Value<bool> isSynced,
+      Value<double?> amountReceived,
+      Value<double?> changeAmount,
     });
 typedef $$OrdersTableUpdateCompanionBuilder =
     OrdersCompanion Function({
@@ -2972,6 +3084,8 @@ typedef $$OrdersTableUpdateCompanionBuilder =
       Value<String> paymentMethod,
       Value<DateTime> createdAt,
       Value<bool> isSynced,
+      Value<double?> amountReceived,
+      Value<double?> changeAmount,
     });
 
 final class $$OrdersTableReferences
@@ -3033,6 +3147,16 @@ class $$OrdersTableFilterComposer
 
   ColumnFilters<bool> get isSynced => $composableBuilder(
     column: $table.isSynced,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amountReceived => $composableBuilder(
+    column: $table.amountReceived,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get changeAmount => $composableBuilder(
+    column: $table.changeAmount,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3100,6 +3224,16 @@ class $$OrdersTableOrderingComposer
     column: $table.isSynced,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get amountReceived => $composableBuilder(
+    column: $table.amountReceived,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get changeAmount => $composableBuilder(
+    column: $table.changeAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$OrdersTableAnnotationComposer
@@ -3134,6 +3268,16 @@ class $$OrdersTableAnnotationComposer
 
   GeneratedColumn<bool> get isSynced =>
       $composableBuilder(column: $table.isSynced, builder: (column) => column);
+
+  GeneratedColumn<double> get amountReceived => $composableBuilder(
+    column: $table.amountReceived,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get changeAmount => $composableBuilder(
+    column: $table.changeAmount,
+    builder: (column) => column,
+  );
 
   Expression<T> orderItemsRefs<T extends Object>(
     Expression<T> Function($$OrderItemsTableAnnotationComposer a) f,
@@ -3195,6 +3339,8 @@ class $$OrdersTableTableManager
                 Value<String> paymentMethod = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<bool> isSynced = const Value.absent(),
+                Value<double?> amountReceived = const Value.absent(),
+                Value<double?> changeAmount = const Value.absent(),
               }) => OrdersCompanion(
                 id: id,
                 orderNumber: orderNumber,
@@ -3202,6 +3348,8 @@ class $$OrdersTableTableManager
                 paymentMethod: paymentMethod,
                 createdAt: createdAt,
                 isSynced: isSynced,
+                amountReceived: amountReceived,
+                changeAmount: changeAmount,
               ),
           createCompanionCallback:
               ({
@@ -3211,6 +3359,8 @@ class $$OrdersTableTableManager
                 required String paymentMethod,
                 required DateTime createdAt,
                 Value<bool> isSynced = const Value.absent(),
+                Value<double?> amountReceived = const Value.absent(),
+                Value<double?> changeAmount = const Value.absent(),
               }) => OrdersCompanion.insert(
                 id: id,
                 orderNumber: orderNumber,
@@ -3218,6 +3368,8 @@ class $$OrdersTableTableManager
                 paymentMethod: paymentMethod,
                 createdAt: createdAt,
                 isSynced: isSynced,
+                amountReceived: amountReceived,
+                changeAmount: changeAmount,
               ),
           withReferenceMapper: (p0) => p0
               .map(

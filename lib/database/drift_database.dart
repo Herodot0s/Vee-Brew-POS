@@ -46,6 +46,8 @@ class Orders extends Table {
   TextColumn get paymentMethod => text()();
   DateTimeColumn get createdAt => dateTime()();
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
+  RealColumn get amountReceived => real().nullable()();
+  RealColumn get changeAmount => real().nullable()();
 }
 
 class OrderItems extends Table {
@@ -63,7 +65,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -78,6 +80,10 @@ class AppDatabase extends _$AppDatabase {
         // Drop and recreate modifiers table to update primary key and add productId
         await m.deleteTable('modifiers');
         await m.createTable(modifiers);
+      }
+      if (from < 4) {
+        await m.addColumn(orders, orders.amountReceived);
+        await m.addColumn(orders, orders.changeAmount);
       }
     },
   );
