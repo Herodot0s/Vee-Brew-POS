@@ -13,6 +13,68 @@ import '../widgets/admin/order_detail_view.dart';
 class _OrderHistoryView extends ConsumerWidget {
   const _OrderHistoryView({super.key});
 
+  void _showDeleteOrderConfirmation(BuildContext context, WidgetRef ref, Order order) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: BinanceTheme.surfaceCardDark,
+        title: Text(
+          'Delete Order',
+          style: BinanceTheme.titleStyle(color: Colors.white),
+        ),
+        content: Text(
+          'Are you sure you want to delete Order #${order.orderNumber}? This will permanently delete the order and all its items from the database.',
+          style: BinanceTheme.titleStyle(color: BinanceTheme.muted),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Cancel',
+              style: BinanceTheme.titleStyle(color: BinanceTheme.muted),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              try {
+                final db = ref.read(databaseProvider);
+                await db.transaction(() async {
+                  await (db.delete(db.orderItems)..where((t) => t.orderId.equals(order.id))).go();
+                  await (db.delete(db.orders)..where((t) => t.id.equals(order.id))).go();
+                });
+                
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Order #${order.orderNumber} deleted successfully.'),
+                      backgroundColor: BinanceTheme.tradingUp,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error deleting order: $e'),
+                      backgroundColor: BinanceTheme.tradingDown,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ordersAsync = ref.watch(filteredOrdersStreamProvider);
@@ -31,31 +93,68 @@ class _OrderHistoryView extends ConsumerWidget {
                     style: const TextStyle(color: BinanceTheme.onDark),
                   ),
                   subtitle: Text('Status: ${order.isSynced ? 'Synced' : 'Pending'}'),
-                  trailing: order.isSynced
-                      ? const Icon(Icons.check, color: Colors.green)
-                      : ElevatedButton(
-                          onPressed: () async {
-                            final db = ref.read(databaseProvider);
-                            await Future.delayed(const Duration(milliseconds: 1200));
-                            await (db.update(db.orders)
-                                  ..where((t) => t.id.equals(order.id)))
-                                .write(OrdersCompanion(isSynced: Value(true)));
-                          },
-                          child: const Text('Sync'),
-                        ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      order.isSynced
+                          ? const Icon(Icons.check, color: Colors.green)
+                          : ElevatedButton(
+                              onPressed: () async {
+                                final db = ref.read(databaseProvider);
+                                await Future.delayed(const Duration(milliseconds: 1200));
+                                await (db.update(db.orders)
+                                      ..where((t) => t.id.equals(order.id)))
+                                    .write(OrdersCompanion(isSynced: Value(true)));
+                              },
+                              child: const Text('Sync'),
+                            ),
+                      const SizedBox(width: BinanceTheme.spaceMd),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                        onPressed: () => _showDeleteOrderConfirmation(context, ref, order),
+                      ),
+                    ],
+                  ),
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(BinanceTheme.spaceMd),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Total: ₱${order.totalAmount}',
-                            style: const TextStyle(
-                              color: BinanceTheme.onDark,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Payment: ${order.paymentMethod}',
+                                style: const TextStyle(color: BinanceTheme.muted),
+                              ),
+                              Text(
+                                'Total: ₱${order.totalAmount.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  color: BinanceTheme.onDark,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
+                          if (order.paymentMethod.toLowerCase() == 'cash' &&
+                              order.amountReceived != null &&
+                              order.changeAmount != null) ...[
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Amount Received: ₱${order.amountReceived!.toStringAsFixed(2)}',
+                                  style: const TextStyle(color: BinanceTheme.muted),
+                                ),
+                                Text(
+                                  'Change: ₱${order.changeAmount!.toStringAsFixed(2)}',
+                                  style: const TextStyle(color: BinanceTheme.muted),
+                                ),
+                              ],
+                            ),
+                          ],
                           const SizedBox(height: 8),
                           OrderDetailView(orderId: order.id),
                         ],
