@@ -17,8 +17,12 @@ class CheckoutService {
   final Ref _ref;
   CheckoutService(this._ref);
 
-  Future<String> processCheckout(String paymentMethod) async {
-    if (!['Cash', 'Card', 'GCash'].contains(paymentMethod)) {
+  Future<String> processCheckout(
+    String paymentMethod, {
+    double? amountReceived,
+    double? changeAmount,
+  }) async {
+    if (!['Cash', 'GCash'].contains(paymentMethod)) {
       throw Exception('Unsupported payment method: $paymentMethod');
     }
 
@@ -52,6 +56,8 @@ class CheckoutService {
               paymentMethod: paymentMethod,
               createdAt: now,
               isSynced: const Value(false),
+              amountReceived: Value(amountReceived),
+              changeAmount: Value(changeAmount),
             ),
           );
 

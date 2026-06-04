@@ -1,3 +1,8 @@
+import java.io.File
+import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
+import java.util.zip.ZipEntry
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -33,6 +38,12 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+        }
+    }
 }
 
 kotlin {
@@ -44,3 +55,69 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+tasks.register("patchFlutterJar") {
+    doLast {
+        val gradleHome = System.getProperty("user.home") + "/.gradle"
+        val cacheDir = File(gradleHome, "caches")
+        if (cacheDir.exists()) {
+            cacheDir.walkTopDown().forEach { file ->
+                if (file.name.contains("flutter_embedding") && file.name.endsWith(".jar")) {
+                    removeLocalizationPluginFromJar(file)
+                }
+            }
+        }
+    }
+}
+
+fun removeLocalizationPluginFromJar(jarFile: File) {
+    val tempJar = File(jarFile.parent, jarFile.name + ".tmp")
+    var modified = false
+    try {
+        ZipInputStream(jarFile.inputStream()).use { zis ->
+            ZipOutputStream(tempJar.outputStream()).use { zos ->
+                var entry = zis.nextEntry
+                while (entry != null) {
+                    if (entry.name.startsWith("io/flutter/plugin/localization/LocalizationPlugin")) {
+                        modified = true
+                        entry = zis.nextEntry
+                        continue
+                    }
+                    zos.putNextEntry(ZipEntry(entry.name))
+                    zis.copyTo(zos)
+                    zos.closeEntry()
+                    entry = zis.nextEntry
+                }
+            }
+        }
+        if (modified) {
+            var deleted = false
+            for (i in 1..5) {
+                if (jarFile.delete()) {
+                    deleted = true
+                    break
+                }
+                Thread.sleep(200)
+            }
+            if (deleted) {
+                tempJar.renameTo(jarFile)
+                println("Successfully patched: ${jarFile.absolutePath}")
+            } else {
+                tempJar.delete()
+                println("Could not delete jar (locked by process): ${jarFile.absolutePath}")
+            }
+        } else {
+            tempJar.delete()
+        }
+    } catch (e: Exception) {
+        if (tempJar.exists()) {
+            tempJar.delete()
+        }
+        println("Error patching jar: ${jarFile.absolutePath} - ${e.message}")
+    }
+}
+
+tasks.matching { it.name.startsWith("compile") || it.name.startsWith("merge") || it.name.startsWith("minify") || it.name.startsWith("dex") }
+    .configureEach {
+        dependsOn("patchFlutterJar")
+    }
