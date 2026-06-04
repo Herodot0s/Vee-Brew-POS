@@ -68,12 +68,31 @@ void main() {
     // Verify checkout modal is open
     expect(find.text('Checkout'), findsOneWidget);
 
-    // Tap CASH payment button
+    // Tap CASH payment button to go to cash payment step
     await tester.tap(find.text('CASH'));
     await tester.pumpAndSettle();
 
+    // Verify cash payment view is shown
+    expect(find.text('Cash Payment'), findsOneWidget);
+    expect(find.text('Confirm'), findsOneWidget);
+
+    // Tap "Exact" denomination button
+    await tester.tap(find.text('Exact'));
+    await tester.pumpAndSettle();
+
+    // Tap "Confirm" button
+    await tester.tap(find.text('Confirm'));
+    await tester.pump(); // Start processing
+
     // Wait for the simulated checkout processing delay in CheckoutModal
     await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(); // Dialog shows up
+
+    // Verify success dialog is showing
+    expect(find.text('Checkout Complete'), findsOneWidget);
+
+    // Tap Done to dismiss dialog and modal
+    await tester.tap(find.text('Done'));
     await tester.pumpAndSettle();
 
     // Verify checkout modal is dismissed
@@ -87,6 +106,8 @@ void main() {
     expect(orders.length, 1);
     expect(orders.first.paymentMethod, 'Cash');
     expect(orders.first.totalAmount, 28.0);
+    expect(orders.first.amountReceived, 28.0);
+    expect(orders.first.changeAmount, 0.0);
 
     final items = await db.select(db.orderItems).get();
     expect(items.length, 1);

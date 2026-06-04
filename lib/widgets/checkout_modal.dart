@@ -320,173 +320,179 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
     final change = enteredValue - total;
     final isValid = enteredValue >= total;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Header
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Cash Payment',
-              style: BinanceTheme.titleStyle(
-                size: 20,
-                weight: FontWeight.bold,
-                color: Colors.white,
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Cash Payment',
+                style: BinanceTheme.titleStyle(
+                  size: 18,
+                  weight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.close, color: BinanceTheme.muted),
-              onPressed: () {
-                _cashController.clear();
-                setState(() => _step = CheckoutStep.methodSelection);
-              },
-            ),
-          ],
-        ),
-        const SizedBox(height: BinanceTheme.spaceMd),
-        Container(height: 1, color: BinanceTheme.surfaceElevatedDark),
-        const SizedBox(height: BinanceTheme.spaceLg),
-
-        // Total Amount Due display
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Total Amount Due:',
-              style: BinanceTheme.titleStyle(color: BinanceTheme.muted),
-            ),
-            Text(
-              '₱${total.toStringAsFixed(2)}',
-              style: BinanceTheme.numberStyle(
-                size: 24,
-                weight: FontWeight.bold,
-                color: BinanceTheme.primary,
+              IconButton(
+                icon: const Icon(Icons.close, color: BinanceTheme.muted),
+                onPressed: () {
+                  _cashController.clear();
+                  setState(() => _step = CheckoutStep.methodSelection);
+                },
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: BinanceTheme.spaceLg),
+            ],
+          ),
+          const SizedBox(height: BinanceTheme.spaceSm),
+          Container(height: 1, color: BinanceTheme.surfaceElevatedDark),
+          const SizedBox(height: BinanceTheme.spaceMd),
 
-        // Text Field for Cash Received
-        TextField(
-          controller: _cashController,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          autofocus: true,
-          style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-          onChanged: (val) => setState(() {}),
-          decoration: InputDecoration(
-            hintText: '0.00',
-            hintStyle: const TextStyle(color: BinanceTheme.muted),
-            prefixText: '₱ ',
-            prefixStyle: const TextStyle(color: BinanceTheme.primary, fontSize: 24, fontWeight: FontWeight.bold),
-            filled: true,
-            fillColor: BinanceTheme.surfaceElevatedDark,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: BinanceTheme.primary, width: 2),
+          // Total Amount Due display
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  'Total Due:',
+                  style: BinanceTheme.titleStyle(color: BinanceTheme.muted, size: 14),
+                ),
+              ),
+              Text(
+                '₱${total.toStringAsFixed(2)}',
+                style: BinanceTheme.numberStyle(
+                  size: 20,
+                  weight: FontWeight.bold,
+                  color: BinanceTheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: BinanceTheme.spaceMd),
+
+          // Text Field for Cash Received
+          TextField(
+            controller: _cashController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            autofocus: true,
+            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            onChanged: (val) => setState(() {}),
+            decoration: InputDecoration(
+              hintText: '0.00',
+              hintStyle: const TextStyle(color: BinanceTheme.muted),
+              prefixText: '₱ ',
+              prefixStyle: const TextStyle(color: BinanceTheme.primary, fontSize: 20, fontWeight: FontWeight.bold),
+              filled: true,
+              fillColor: BinanceTheme.surfaceElevatedDark,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: BinanceTheme.primary, width: 2),
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: BinanceTheme.spaceLg),
+          const SizedBox(height: BinanceTheme.spaceMd),
 
-        // Denominations Quick Buttons
-        Wrap(
-          spacing: BinanceTheme.spaceSm,
-          runSpacing: BinanceTheme.spaceSm,
-          children: [
-            _buildDenomButton('Exact', null, total),
-            _buildDenomButton('₱50', 50.0, total),
-            _buildDenomButton('₱100', 100.0, total),
-            _buildDenomButton('₱200', 200.0, total),
-            _buildDenomButton('₱500', 500.0, total),
-            _buildDenomButton('₱1000', 1000.0, total),
-          ],
-        ),
-        const SizedBox(height: BinanceTheme.spaceLg),
+          // Denominations Quick Buttons
+          Wrap(
+            spacing: BinanceTheme.spaceSm,
+            runSpacing: BinanceTheme.spaceSm,
+            children: [
+              _buildDenomButton('Exact', null, total),
+              _buildDenomButton('₱50', 50.0, total),
+              _buildDenomButton('₱100', 100.0, total),
+              _buildDenomButton('₱200', 200.0, total),
+              _buildDenomButton('₱500', 500.0, total),
+              _buildDenomButton('₱1000', 1000.0, total),
+            ],
+          ),
+          const SizedBox(height: BinanceTheme.spaceMd),
 
-        // Change display
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Change:',
-              style: BinanceTheme.titleStyle(color: BinanceTheme.muted, size: 16),
-            ),
-            Text(
-              isValid ? '₱${change.toStringAsFixed(2)}' : '₱0.00',
-              style: BinanceTheme.numberStyle(
-                size: 24,
-                weight: FontWeight.bold,
-                color: isValid ? BinanceTheme.tradingUp : BinanceTheme.tradingDown,
+          // Change display
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  'Change:',
+                  style: BinanceTheme.titleStyle(color: BinanceTheme.muted, size: 14),
+                ),
               ),
+              Text(
+                isValid ? '₱${change.toStringAsFixed(2)}' : '₱0.00',
+                style: BinanceTheme.numberStyle(
+                  size: 20,
+                  weight: FontWeight.bold,
+                  color: isValid ? BinanceTheme.tradingUp : BinanceTheme.tradingDown,
+                ),
+              ),
+            ],
+          ),
+          if (!isValid && _cashController.text.isNotEmpty) ...[
+            const SizedBox(height: BinanceTheme.spaceXs),
+            Text(
+              'Insufficient amount entered',
+              style: BinanceTheme.titleStyle(color: BinanceTheme.tradingDown, size: 11),
+              textAlign: TextAlign.end,
             ),
           ],
-        ),
-        if (!isValid && _cashController.text.isNotEmpty) ...[
-          const SizedBox(height: BinanceTheme.spaceXs),
-          Text(
-            'Insufficient amount entered',
-            style: BinanceTheme.titleStyle(color: BinanceTheme.tradingDown, size: 12),
-            textAlign: TextAlign.end,
+
+          const SizedBox(height: BinanceTheme.spaceLg),
+
+          // Action Buttons
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: _isProcessing
+                      ? null
+                      : () {
+                          _cashController.clear();
+                          setState(() => _step = CheckoutStep.methodSelection);
+                        },
+                  child: Text(
+                    'Back',
+                    style: BinanceTheme.titleStyle(color: BinanceTheme.muted),
+                  ),
+                ),
+              ),
+              const SizedBox(width: BinanceTheme.spaceMd),
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: BinanceTheme.primary,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: BinanceTheme.spaceMd),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    disabledBackgroundColor: BinanceTheme.surfaceElevatedDark,
+                    disabledForegroundColor: BinanceTheme.muted,
+                  ),
+                  onPressed: (!isValid || _isProcessing)
+                      ? null
+                      : () {
+                          _handlePayment('Cash', amountReceived: enteredValue, changeAmount: change);
+                        },
+                  child: _isProcessing
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                        )
+                      : Text(
+                          'Confirm',
+                          style: BinanceTheme.titleStyle(color: Colors.black, weight: FontWeight.bold, size: 14),
+                        ),
+                ),
+              ),
+            ],
           ),
         ],
-
-        const SizedBox(height: BinanceTheme.spaceXl),
-
-        // Action Buttons
-        Row(
-          children: [
-            Expanded(
-              child: TextButton(
-                onPressed: _isProcessing
-                    ? null
-                    : () {
-                        _cashController.clear();
-                        setState(() => _step = CheckoutStep.methodSelection);
-                      },
-                child: Text(
-                  'Back',
-                  style: BinanceTheme.titleStyle(color: BinanceTheme.muted),
-                ),
-              ),
-            ),
-            const SizedBox(width: BinanceTheme.spaceMd),
-            Expanded(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: BinanceTheme.primary,
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: BinanceTheme.spaceMd),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  disabledBackgroundColor: BinanceTheme.surfaceElevatedDark,
-                  disabledForegroundColor: BinanceTheme.muted,
-                ),
-                onPressed: (!isValid || _isProcessing)
-                    ? null
-                    : () {
-                        _handlePayment('Cash', amountReceived: enteredValue, changeAmount: change);
-                      },
-                child: _isProcessing
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
-                      )
-                    : Text(
-                        'Confirm Payment',
-                        style: BinanceTheme.titleStyle(color: Colors.black, weight: FontWeight.bold),
-                      ),
-              ),
-            ),
-          ],
-        ),
-      ],
+      ),
     );
   }
 
