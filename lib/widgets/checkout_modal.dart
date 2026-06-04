@@ -11,7 +11,7 @@ import '../services/receipt_generator.dart';
 import '../theme/binance_theme.dart';
 import 'checkout/gcash_payment_view.dart';
 
-enum CheckoutStep { methodSelection, gcashVerification }
+enum CheckoutStep { methodSelection, gcashVerification, cashPayment }
 
 class CheckoutModal extends ConsumerStatefulWidget {
   const CheckoutModal({super.key});
@@ -24,15 +24,26 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
   bool _isProcessing = false;
   CheckoutStep _step = CheckoutStep.methodSelection;
   final _printerService = PrinterService();
+  final _cashController = TextEditingController();
 
-  Future<void> _handlePayment(String method) async {
+  @override
+  void dispose() {
+    _cashController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handlePayment(String method, {double? amountReceived, double? changeAmount}) async {
     setState(() => _isProcessing = true);
 
     try {
       final cartSnapshot = ref.read(cartProvider);
       final total = ref.read(cartTotalProvider);
       final orderNumber =
-          await ref.read(checkoutServiceProvider).processCheckout(method);
+          await ref.read(checkoutServiceProvider).processCheckout(
+            method,
+            amountReceived: amountReceived,
+            changeAmount: changeAmount,
+          );
 
       if (!mounted) return;
 
@@ -53,7 +64,7 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
         ),
       );
 
-      _showPrintOption(context, orderNumber, cartSnapshot, total);
+      _showPrintOption(context, orderNumber, cartSnapshot, total, method, amountReceived, changeAmount);
     } on Exception catch (e) {
       if (!mounted) return;
       setState(() => _isProcessing = false);
@@ -72,7 +83,7 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
   }
 
   void _showPrintOption(BuildContext context, String orderNumber,
-      List<OrderItem> items, double total) {
+      List<OrderItem> items, double total, String paymentMethod, double? amountReceived, double? changeAmount) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -110,7 +121,13 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
                   final isConnected = await _printerService.isConnected();
                   if (isConnected) {
                     final bytes = await ReceiptGenerator.generateBytes(
-                        orderNumber, items, total);
+                      orderNumber,
+                      items,
+                      total,
+                      paymentMethod: paymentMethod,
+                      amountReceived: amountReceived,
+                      changeAmount: changeAmount,
+                    );
                     await PrintBluetoothThermal.writeBytes(bytes);
                     if (context.mounted) {
                       Navigator.of(context).pop();
@@ -118,7 +135,7 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
                     }
                   } else {
                     if (context.mounted) {
-                      _showPrinterSelection(context, orderNumber, items, total);
+                      _showPrinterSelection(context, orderNumber, items, total, paymentMethod, amountReceived, changeAmount);
                     }
                   }
                 } catch (e) {
@@ -137,7 +154,7 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
   }
 
   void _showPrinterSelection(BuildContext context, String orderNumber,
-      List<OrderItem> items, double total) async {
+      List<OrderItem> items, double total, String paymentMethod, double? amountReceived, double? changeAmount) async {
     final devices = await _printerService.getDevices();
 
     if (!context.mounted) return;
@@ -169,7 +186,13 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
                           final connected = await _printerService.connect(device.macAdress);
                           if (connected) {
                             final bytes = await ReceiptGenerator.generateBytes(
-                                orderNumber, items, total);
+                              orderNumber,
+                              items,
+                              total,
+                              paymentMethod: paymentMethod,
+                              amountReceived: amountReceived,
+                              changeAmount: changeAmount,
+                            );
                             await PrintBluetoothThermal.writeBytes(bytes);
                             if (context.mounted) {
                               Navigator.of(context).pop(); // Printer selection
@@ -259,15 +282,7 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
                 child: _PaymentButton(
                   label: 'CASH',
                   icon: Icons.payments_outlined,
-                  onTap: () => _handlePayment('Cash'),
-                ),
-              ),
-              const SizedBox(width: BinanceTheme.spaceMd),
-              Expanded(
-                child: _PaymentButton(
-                  label: 'CARD',
-                  icon: Icons.credit_card_outlined,
-                  onTap: () => _handlePayment('Card'),
+                  onTap: () => setState(() => _step = CheckoutStep.cashPayment),
                 ),
               ),
               const SizedBox(width: BinanceTheme.spaceMd),
@@ -300,6 +315,207 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
     );
   }
 
+  Widget _buildCashPaymentSelection(double total) {
+    final enteredValue = double.tryParse(_cashController.text) ?? 0.0;
+    final change = enteredValue - total;
+    final isValid = enteredValue >= total;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Header
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Cash Payment',
+              style: BinanceTheme.titleStyle(
+                size: 20,
+                weight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, color: BinanceTheme.muted),
+              onPressed: () {
+                _cashController.clear();
+                setState(() => _step = CheckoutStep.methodSelection);
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: BinanceTheme.spaceMd),
+        Container(height: 1, color: BinanceTheme.surfaceElevatedDark),
+        const SizedBox(height: BinanceTheme.spaceLg),
+
+        // Total Amount Due display
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Total Amount Due:',
+              style: BinanceTheme.titleStyle(color: BinanceTheme.muted),
+            ),
+            Text(
+              '₱${total.toStringAsFixed(2)}',
+              style: BinanceTheme.numberStyle(
+                size: 24,
+                weight: FontWeight.bold,
+                color: BinanceTheme.primary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: BinanceTheme.spaceLg),
+
+        // Text Field for Cash Received
+        TextField(
+          controller: _cashController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          autofocus: true,
+          style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+          onChanged: (val) => setState(() {}),
+          decoration: InputDecoration(
+            hintText: '0.00',
+            hintStyle: const TextStyle(color: BinanceTheme.muted),
+            prefixText: '₱ ',
+            prefixStyle: const TextStyle(color: BinanceTheme.primary, fontSize: 24, fontWeight: FontWeight.bold),
+            filled: true,
+            fillColor: BinanceTheme.surfaceElevatedDark,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: BinanceTheme.primary, width: 2),
+            ),
+          ),
+        ),
+        const SizedBox(height: BinanceTheme.spaceLg),
+
+        // Denominations Quick Buttons
+        Wrap(
+          spacing: BinanceTheme.spaceSm,
+          runSpacing: BinanceTheme.spaceSm,
+          children: [
+            _buildDenomButton('Exact', null, total),
+            _buildDenomButton('₱50', 50.0, total),
+            _buildDenomButton('₱100', 100.0, total),
+            _buildDenomButton('₱200', 200.0, total),
+            _buildDenomButton('₱500', 500.0, total),
+            _buildDenomButton('₱1000', 1000.0, total),
+          ],
+        ),
+        const SizedBox(height: BinanceTheme.spaceLg),
+
+        // Change display
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Change:',
+              style: BinanceTheme.titleStyle(color: BinanceTheme.muted, size: 16),
+            ),
+            Text(
+              isValid ? '₱${change.toStringAsFixed(2)}' : '₱0.00',
+              style: BinanceTheme.numberStyle(
+                size: 24,
+                weight: FontWeight.bold,
+                color: isValid ? BinanceTheme.tradingUp : BinanceTheme.tradingDown,
+              ),
+            ),
+          ],
+        ),
+        if (!isValid && _cashController.text.isNotEmpty) ...[
+          const SizedBox(height: BinanceTheme.spaceXs),
+          Text(
+            'Insufficient amount entered',
+            style: BinanceTheme.titleStyle(color: BinanceTheme.tradingDown, size: 12),
+            textAlign: TextAlign.end,
+          ),
+        ],
+
+        const SizedBox(height: BinanceTheme.spaceXl),
+
+        // Action Buttons
+        Row(
+          children: [
+            Expanded(
+              child: TextButton(
+                onPressed: _isProcessing
+                    ? null
+                    : () {
+                        _cashController.clear();
+                        setState(() => _step = CheckoutStep.methodSelection);
+                      },
+                child: Text(
+                  'Back',
+                  style: BinanceTheme.titleStyle(color: BinanceTheme.muted),
+                ),
+              ),
+            ),
+            const SizedBox(width: BinanceTheme.spaceMd),
+            Expanded(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: BinanceTheme.primary,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: BinanceTheme.spaceMd),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  disabledBackgroundColor: BinanceTheme.surfaceElevatedDark,
+                  disabledForegroundColor: BinanceTheme.muted,
+                ),
+                onPressed: (!isValid || _isProcessing)
+                    ? null
+                    : () {
+                        _handlePayment('Cash', amountReceived: enteredValue, changeAmount: change);
+                      },
+                child: _isProcessing
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                      )
+                    : Text(
+                        'Confirm Payment',
+                        style: BinanceTheme.titleStyle(color: Colors.black, weight: FontWeight.bold),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDenomButton(String label, double? value, double total) {
+    return InkWell(
+      onTap: () {
+        if (value == null) {
+          _cashController.text = total.toStringAsFixed(2);
+        } else {
+          _cashController.text = value.toStringAsFixed(2);
+        }
+        setState(() {});
+      },
+      borderRadius: BorderRadius.circular(4),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: BinanceTheme.spaceMd, vertical: BinanceTheme.spaceSm),
+        decoration: BoxDecoration(
+          border: Border.all(color: BinanceTheme.surfaceElevatedDark),
+          borderRadius: BorderRadius.circular(4),
+          color: BinanceTheme.surfaceElevatedDark.withValues(alpha: 0.3),
+        ),
+        child: Text(
+          label,
+          style: BinanceTheme.titleStyle(color: Colors.white, size: 14),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final total = ref.watch(cartTotalProvider);
@@ -317,7 +533,9 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
                 onConfirm: (refNumber) => _handlePayment('GCash'),
                 onCancel: () => setState(() => _step = CheckoutStep.methodSelection),
               )
-            : _buildMethodSelection(total, cart.length),
+            : _step == CheckoutStep.cashPayment
+                ? _buildCashPaymentSelection(total)
+                : _buildMethodSelection(total, cart.length),
       ),
     );
   }
