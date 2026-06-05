@@ -121,6 +121,22 @@ class _OrderHistoryView extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          if (order.customerName != null && order.customerName!.trim().isNotEmpty) ...[
+                            Row(
+                              children: [
+                                const Icon(Icons.person_outline, size: 16, color: BinanceTheme.primary),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Customer: ${order.customerName}',
+                                  style: const TextStyle(
+                                    color: BinanceTheme.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                          ],
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
