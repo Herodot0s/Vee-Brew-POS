@@ -18,7 +18,10 @@ class POSScreen extends ConsumerWidget {
       backgroundColor: BinanceTheme.canvasDark,
       body: Row(
         children: [
-          const Expanded(flex: 2, child: CategorySidebar()),
+          const Expanded(
+            flex: 2,
+            child: RepaintBoundary(child: CategorySidebar()),
+          ),
           const VerticalDivider(
             width: 1,
             color: BinanceTheme.surfaceElevatedDark,
@@ -26,15 +29,21 @@ class POSScreen extends ConsumerWidget {
           Expanded(
             flex: 8,
             child: isAdminMode
-                ? const AdminDashboardScreen()
+                ? const RepaintBoundary(child: AdminDashboardScreen())
                 : const Row(
                     children: [
-                      Expanded(flex: 5, child: ProductGrid()),
+                      Expanded(
+                        flex: 5,
+                        child: RepaintBoundary(child: ProductGrid()),
+                      ),
                       VerticalDivider(
                         width: 1,
                         color: BinanceTheme.surfaceElevatedDark,
                       ),
-                      Expanded(flex: 3, child: OrderTicket()),
+                      Expanded(
+                        flex: 3,
+                        child: RepaintBoundary(child: OrderTicket()),
+                      ),
                     ],
                   ),
           ),
