@@ -385,167 +385,9 @@ class _ModifierManagementView extends ConsumerWidget {
     Modifier? modifier,
     bool isShared = false,
   }) {
-    final nameController = TextEditingController(text: modifier?.name);
-    final priceController = TextEditingController(
-      text: modifier?.priceDelta.toString(),
-    );
-    final groupController = TextEditingController(text: modifier?.groupName);
-    String? selectedProductId = modifier?.productId;
-
     showDialog(
       context: context,
-      builder: (context) => Consumer(
-        builder: (context, ref, _) {
-          final productsAsync = ref.watch(allProductsStreamProvider);
-          return productsAsync.when(
-            data: (products) => StatefulBuilder(
-              builder: (context, setState) => AlertDialog(
-                backgroundColor: BinanceTheme.surfaceCardDark,
-                title: Text(
-                  modifier == null
-                      ? 'Add Modifier'
-                      : (isShared ? 'Edit Shared Modifier' : 'Edit Modifier'),
-                  style: const TextStyle(color: BinanceTheme.onDark),
-                ),
-                content: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextField(
-                        controller: nameController,
-                        style: const TextStyle(color: BinanceTheme.onDark),
-                        decoration: const InputDecoration(
-                          labelText: 'Name',
-                          labelStyle: TextStyle(color: BinanceTheme.muted),
-                        ),
-                      ),
-                      TextField(
-                        controller: priceController,
-                        style: const TextStyle(color: BinanceTheme.onDark),
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        decoration: const InputDecoration(
-                          labelText: 'Price Delta',
-                          labelStyle: TextStyle(color: BinanceTheme.muted),
-                        ),
-                      ),
-                      TextField(
-                        controller: groupController,
-                        style: const TextStyle(color: BinanceTheme.onDark),
-                        decoration: const InputDecoration(
-                          labelText: 'Group Name',
-                          hintText: 'e.g., Size, Syrup',
-                          hintStyle: TextStyle(color: BinanceTheme.muted),
-                          labelStyle: TextStyle(color: BinanceTheme.muted),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      if (isShared)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                          child: Text(
-                            'Applied to multiple products',
-                            style: TextStyle(
-                              color: BinanceTheme.muted,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        )
-                      else
-                        DropdownButtonFormField<String>(
-                          dropdownColor: BinanceTheme.surfaceCardDark,
-                          value: selectedProductId,
-                          style: const TextStyle(color: BinanceTheme.onDark),
-                          decoration: const InputDecoration(
-                            labelText: 'Target Product',
-                            labelStyle: TextStyle(color: BinanceTheme.muted),
-                          ),
-                          items: products
-                              .map(
-                                (p) => DropdownMenuItem(
-                                  value: p.id,
-                                  child: Text(p.name),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (val) =>
-                              setState(() => selectedProductId = val),
-                        ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (nameController.text.isEmpty ||
-                          priceController.text.isEmpty ||
-                          groupController.text.isEmpty ||
-                          (!isShared && selectedProductId == null))
-                        return;
-                      final db = ref.read(databaseProvider);
-                      final price =
-                          double.tryParse(priceController.text) ?? 0.0;
-
-                      if (modifier == null) {
-                        await db
-                            .into(db.modifiers)
-                            .insert(
-                              ModifiersCompanion.insert(
-                                id: DateTime.now().millisecondsSinceEpoch
-                                    .toString(),
-                                productId: selectedProductId!,
-                                name: nameController.text,
-                                priceDelta: price,
-                                groupName: groupController.text,
-                              ),
-                            );
-                      } else {
-                        if (isShared) {
-                          await (db.update(db.modifiers)
-                                ..where((t) => t.id.equals(modifier.id)))
-                              .write(
-                                ModifiersCompanion(
-                                  name: Value(nameController.text),
-                                  priceDelta: Value(price),
-                                  groupName: Value(groupController.text),
-                                ),
-                              );
-                        } else {
-                          await (db.update(db.modifiers)
-                                ..where(
-                                  (t) =>
-                                      t.id.equals(modifier.id) &
-                                      t.productId.equals(modifier.productId),
-                                ))
-                              .write(
-                                ModifiersCompanion(
-                                  productId: Value(selectedProductId!),
-                                  name: Value(nameController.text),
-                                  priceDelta: Value(price),
-                                  groupName: Value(groupController.text),
-                                ),
-                              );
-                        }
-                      }
-                      if (!context.mounted) return;
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Save'),
-                  ),
-                ],
-              ),
-            ),
-            error: (_, __) =>
-                const AlertDialog(content: Text('Error loading products')),
-            loading: () => const Center(child: CircularProgressIndicator()),
-          );
-        },
-      ),
+      builder: (context) => _ModifierEditDialog(modifier: modifier),
     );
   }
 
@@ -599,6 +441,281 @@ class _ModifierManagementView extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ModifierEditDialog extends ConsumerStatefulWidget {
+  final Modifier? modifier;
+
+  const _ModifierEditDialog({super.key, this.modifier});
+
+  @override
+  ConsumerState<_ModifierEditDialog> createState() => _ModifierEditDialogState();
+}
+
+class _ModifierEditDialogState extends ConsumerState<_ModifierEditDialog> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _priceController;
+  late final TextEditingController _groupController;
+  final Set<String> _selectedProductIds = {};
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.modifier?.name);
+    _priceController = TextEditingController(text: widget.modifier?.priceDelta.toString() ?? '');
+    _groupController = TextEditingController(text: widget.modifier?.groupName);
+    _loadInitialAssignments();
+  }
+
+  Future<void> _loadInitialAssignments() async {
+    if (widget.modifier != null) {
+      final db = ref.read(databaseProvider);
+      final existing = await (db.select(db.modifiers)
+            ..where((t) => t.id.equals(widget.modifier!.id)))
+          .get();
+      setState(() {
+        _selectedProductIds.addAll(existing.map((m) => m.productId));
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _priceController.dispose();
+    _groupController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const AlertDialog(
+        backgroundColor: BinanceTheme.surfaceCardDark,
+        content: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final productsAsync = ref.watch(allProductsStreamProvider);
+    final categoriesAsync = ref.watch(categoriesStreamProvider);
+
+    return productsAsync.when(
+      data: (products) {
+        // Group products by category
+        final Map<String, List<Product>> categoryToProducts = {};
+        for (final prod in products) {
+          categoryToProducts.putIfAbsent(prod.categoryId, () => []).add(prod);
+        }
+
+        final canSave = _nameController.text.isNotEmpty &&
+            _priceController.text.isNotEmpty &&
+            _groupController.text.isNotEmpty &&
+            _selectedProductIds.isNotEmpty;
+
+        return AlertDialog(
+          backgroundColor: BinanceTheme.surfaceCardDark,
+          title: Text(
+            widget.modifier == null ? 'Add Modifier' : 'Edit Modifier',
+            style: const TextStyle(color: BinanceTheme.onDark),
+          ),
+          content: SizedBox(
+            width: 400,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: _nameController,
+                    style: const TextStyle(color: BinanceTheme.onDark),
+                    decoration: const InputDecoration(
+                      labelText: 'Name',
+                      labelStyle: TextStyle(color: BinanceTheme.muted),
+                    ),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  TextField(
+                    controller: _priceController,
+                    style: const TextStyle(color: BinanceTheme.onDark),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Price Delta',
+                      labelStyle: TextStyle(color: BinanceTheme.muted),
+                    ),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  TextField(
+                    controller: _groupController,
+                    style: const TextStyle(color: BinanceTheme.onDark),
+                    decoration: const InputDecoration(
+                      labelText: 'Group Name',
+                      hintText: 'e.g., Size, Syrup',
+                      hintStyle: TextStyle(color: BinanceTheme.muted),
+                      labelStyle: TextStyle(color: BinanceTheme.muted),
+                    ),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Applies to Products',
+                    style: TextStyle(
+                      color: BinanceTheme.onDark,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    constraints: const BoxConstraints(maxHeight: 250),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: BinanceTheme.surfaceElevatedDark),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: categoriesAsync.when(
+                      data: (categories) {
+                        return ListView(
+                          shrinkWrap: true,
+                          children: categories.map((cat) {
+                            final catProducts = categoryToProducts[cat.id] ?? [];
+                            if (catProducts.isEmpty) return const SizedBox.shrink();
+
+                            final catProductIds = catProducts.map((p) => p.id).toSet();
+                            final isAllSelected = catProductIds.every((id) => _selectedProductIds.contains(id));
+
+                            return ExpansionTile(
+                              title: Text(cat.name, style: const TextStyle(color: BinanceTheme.onDark)),
+                              children: [
+                                CheckboxListTile(
+                                  title: Text('Select All ${cat.name}', style: const TextStyle(color: BinanceTheme.muted, fontStyle: FontStyle.italic)),
+                                  value: isAllSelected,
+                                  activeColor: BinanceTheme.primary,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      if (val == true) {
+                                        _selectedProductIds.addAll(catProductIds);
+                                      } else {
+                                        _selectedProductIds.removeAll(catProductIds);
+                                      }
+                                    });
+                                  },
+                                ),
+                                ...catProducts.map((prod) {
+                                  final isSelected = _selectedProductIds.contains(prod.id);
+                                  return CheckboxListTile(
+                                    title: Text(prod.name, style: const TextStyle(color: BinanceTheme.onDark)),
+                                    value: isSelected,
+                                    activeColor: BinanceTheme.primary,
+                                    onChanged: (val) {
+                                      setState(() {
+                                        if (val == true) {
+                                          _selectedProductIds.add(prod.id);
+                                        } else {
+                                          _selectedProductIds.remove(prod.id);
+                                        }
+                                      });
+                                    },
+                                  );
+                                }),
+                              ],
+                            );
+                          }).toList(),
+                        );
+                      },
+                      loading: () => const Center(child: CircularProgressIndicator()),
+                      error: (_, __) => const Text('Error loading categories', style: TextStyle(color: Colors.red)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: !canSave
+                  ? null
+                  : () async {
+                      final db = ref.read(databaseProvider);
+                      final price = double.tryParse(_priceController.text) ?? 0.0;
+                      final name = _nameController.text;
+                      final group = _groupController.text;
+
+                      if (widget.modifier == null) {
+                        final newId = DateTime.now().millisecondsSinceEpoch.toString();
+                        await db.transaction(() async {
+                          for (final prodId in _selectedProductIds) {
+                            await db.into(db.modifiers).insert(
+                              ModifiersCompanion.insert(
+                                id: newId,
+                                productId: prodId,
+                                name: name,
+                                priceDelta: price,
+                                groupName: group,
+                              ),
+                            );
+                          }
+                        });
+                      } else {
+                        await db.transaction(() async {
+                          final existing = await (db.select(db.modifiers)
+                                ..where((t) => t.id.equals(widget.modifier!.id)))
+                              .get();
+                          final existingProdIds = existing.map((m) => m.productId).toSet();
+
+                          final toAdd = _selectedProductIds.difference(existingProdIds);
+                          for (final prodId in toAdd) {
+                            await db.into(db.modifiers).insert(
+                              ModifiersCompanion.insert(
+                                id: widget.modifier!.id,
+                                productId: prodId,
+                                name: name,
+                                priceDelta: price,
+                                groupName: group,
+                              ),
+                            );
+                          }
+
+                          final toDelete = existingProdIds.difference(_selectedProductIds);
+                          if (toDelete.isNotEmpty) {
+                            await (db.delete(db.modifiers)
+                                  ..where((t) => t.id.equals(widget.modifier!.id) & t.productId.isIn(toDelete)))
+                                .go();
+                          }
+
+                          final remaining = _selectedProductIds.intersection(existingProdIds);
+                          if (remaining.isNotEmpty) {
+                            await (db.update(db.modifiers)
+                                  ..where((t) => t.id.equals(widget.modifier!.id) & t.productId.isIn(remaining)))
+                                .write(
+                                  ModifiersCompanion(
+                                    name: Value(name),
+                                    priceDelta: Value(price),
+                                    groupName: Value(group),
+                                  ),
+                                );
+                          }
+                        });
+                      }
+                      if (!context.mounted) return;
+                      Navigator.pop(context);
+                    },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+      error: (_, __) => const AlertDialog(content: Text('Error loading products')),
+      loading: () => const Center(child: CircularProgressIndicator()),
     );
   }
 }
