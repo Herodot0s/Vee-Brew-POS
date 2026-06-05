@@ -43,6 +43,21 @@ void main() {
     expect(order.isSynced, isTrue);
   });
 
+  test('Database customer name persistence', () async {
+    final id = await db.into(db.orders).insert(
+      OrdersCompanion.insert(
+        orderNumber: '20260605-999',
+        totalAmount: 150.0,
+        paymentMethod: 'Cash',
+        createdAt: DateTime.now(),
+        customerName: const Value('Juan Dela Cruz'),
+      ),
+    );
+
+    final order = await (db.select(db.orders)..where((t) => t.id.equals(id))).getSingle();
+    expect(order.customerName, 'Juan Dela Cruz');
+  });
+
   test('Modifier update and delete only affects specific product', () async {
     // Seed category
     await db.into(db.categories).insert(

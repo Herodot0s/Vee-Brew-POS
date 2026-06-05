@@ -48,6 +48,7 @@ class Orders extends Table {
   BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
   RealColumn get amountReceived => real().nullable()();
   RealColumn get changeAmount => real().nullable()();
+  TextColumn get customerName => text().nullable()();
 }
 
 class OrderItems extends Table {
@@ -65,7 +66,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.memory() : super(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -84,6 +85,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 4) {
         await m.addColumn(orders, orders.amountReceived);
         await m.addColumn(orders, orders.changeAmount);
+      }
+      if (from < 5) {
+        await m.addColumn(orders, orders.customerName);
       }
     },
   );

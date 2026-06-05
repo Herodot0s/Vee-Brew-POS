@@ -1090,6 +1090,17 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _customerNameMeta = const VerificationMeta(
+    'customerName',
+  );
+  @override
+  late final GeneratedColumn<String> customerName = GeneratedColumn<String>(
+    'customer_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1100,6 +1111,7 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
     isSynced,
     amountReceived,
     changeAmount,
+    customerName,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1181,6 +1193,15 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
         ),
       );
     }
+    if (data.containsKey('customer_name')) {
+      context.handle(
+        _customerNameMeta,
+        customerName.isAcceptableOrUnknown(
+          data['customer_name']!,
+          _customerNameMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1222,6 +1243,10 @@ class $OrdersTable extends Orders with TableInfo<$OrdersTable, Order> {
         DriftSqlType.double,
         data['${effectivePrefix}change_amount'],
       ),
+      customerName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}customer_name'],
+      ),
     );
   }
 
@@ -1240,6 +1265,7 @@ class Order extends DataClass implements Insertable<Order> {
   final bool isSynced;
   final double? amountReceived;
   final double? changeAmount;
+  final String? customerName;
   const Order({
     required this.id,
     required this.orderNumber,
@@ -1249,6 +1275,7 @@ class Order extends DataClass implements Insertable<Order> {
     required this.isSynced,
     this.amountReceived,
     this.changeAmount,
+    this.customerName,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1264,6 +1291,9 @@ class Order extends DataClass implements Insertable<Order> {
     }
     if (!nullToAbsent || changeAmount != null) {
       map['change_amount'] = Variable<double>(changeAmount);
+    }
+    if (!nullToAbsent || customerName != null) {
+      map['customer_name'] = Variable<String>(customerName);
     }
     return map;
   }
@@ -1282,6 +1312,9 @@ class Order extends DataClass implements Insertable<Order> {
       changeAmount: changeAmount == null && nullToAbsent
           ? const Value.absent()
           : Value(changeAmount),
+      customerName: customerName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customerName),
     );
   }
 
@@ -1299,6 +1332,7 @@ class Order extends DataClass implements Insertable<Order> {
       isSynced: serializer.fromJson<bool>(json['isSynced']),
       amountReceived: serializer.fromJson<double?>(json['amountReceived']),
       changeAmount: serializer.fromJson<double?>(json['changeAmount']),
+      customerName: serializer.fromJson<String?>(json['customerName']),
     );
   }
   @override
@@ -1313,6 +1347,7 @@ class Order extends DataClass implements Insertable<Order> {
       'isSynced': serializer.toJson<bool>(isSynced),
       'amountReceived': serializer.toJson<double?>(amountReceived),
       'changeAmount': serializer.toJson<double?>(changeAmount),
+      'customerName': serializer.toJson<String?>(customerName),
     };
   }
 
@@ -1325,6 +1360,7 @@ class Order extends DataClass implements Insertable<Order> {
     bool? isSynced,
     Value<double?> amountReceived = const Value.absent(),
     Value<double?> changeAmount = const Value.absent(),
+    Value<String?> customerName = const Value.absent(),
   }) => Order(
     id: id ?? this.id,
     orderNumber: orderNumber ?? this.orderNumber,
@@ -1336,6 +1372,7 @@ class Order extends DataClass implements Insertable<Order> {
         ? amountReceived.value
         : this.amountReceived,
     changeAmount: changeAmount.present ? changeAmount.value : this.changeAmount,
+    customerName: customerName.present ? customerName.value : this.customerName,
   );
   Order copyWithCompanion(OrdersCompanion data) {
     return Order(
@@ -1357,6 +1394,9 @@ class Order extends DataClass implements Insertable<Order> {
       changeAmount: data.changeAmount.present
           ? data.changeAmount.value
           : this.changeAmount,
+      customerName: data.customerName.present
+          ? data.customerName.value
+          : this.customerName,
     );
   }
 
@@ -1370,7 +1410,8 @@ class Order extends DataClass implements Insertable<Order> {
           ..write('createdAt: $createdAt, ')
           ..write('isSynced: $isSynced, ')
           ..write('amountReceived: $amountReceived, ')
-          ..write('changeAmount: $changeAmount')
+          ..write('changeAmount: $changeAmount, ')
+          ..write('customerName: $customerName')
           ..write(')'))
         .toString();
   }
@@ -1385,6 +1426,7 @@ class Order extends DataClass implements Insertable<Order> {
     isSynced,
     amountReceived,
     changeAmount,
+    customerName,
   );
   @override
   bool operator ==(Object other) =>
@@ -1397,7 +1439,8 @@ class Order extends DataClass implements Insertable<Order> {
           other.createdAt == this.createdAt &&
           other.isSynced == this.isSynced &&
           other.amountReceived == this.amountReceived &&
-          other.changeAmount == this.changeAmount);
+          other.changeAmount == this.changeAmount &&
+          other.customerName == this.customerName);
 }
 
 class OrdersCompanion extends UpdateCompanion<Order> {
@@ -1409,6 +1452,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
   final Value<bool> isSynced;
   final Value<double?> amountReceived;
   final Value<double?> changeAmount;
+  final Value<String?> customerName;
   const OrdersCompanion({
     this.id = const Value.absent(),
     this.orderNumber = const Value.absent(),
@@ -1418,6 +1462,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     this.isSynced = const Value.absent(),
     this.amountReceived = const Value.absent(),
     this.changeAmount = const Value.absent(),
+    this.customerName = const Value.absent(),
   });
   OrdersCompanion.insert({
     this.id = const Value.absent(),
@@ -1428,6 +1473,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     this.isSynced = const Value.absent(),
     this.amountReceived = const Value.absent(),
     this.changeAmount = const Value.absent(),
+    this.customerName = const Value.absent(),
   }) : orderNumber = Value(orderNumber),
        totalAmount = Value(totalAmount),
        paymentMethod = Value(paymentMethod),
@@ -1441,6 +1487,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     Expression<bool>? isSynced,
     Expression<double>? amountReceived,
     Expression<double>? changeAmount,
+    Expression<String>? customerName,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1451,6 +1498,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
       if (isSynced != null) 'is_synced': isSynced,
       if (amountReceived != null) 'amount_received': amountReceived,
       if (changeAmount != null) 'change_amount': changeAmount,
+      if (customerName != null) 'customer_name': customerName,
     });
   }
 
@@ -1463,6 +1511,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     Value<bool>? isSynced,
     Value<double?>? amountReceived,
     Value<double?>? changeAmount,
+    Value<String?>? customerName,
   }) {
     return OrdersCompanion(
       id: id ?? this.id,
@@ -1473,6 +1522,7 @@ class OrdersCompanion extends UpdateCompanion<Order> {
       isSynced: isSynced ?? this.isSynced,
       amountReceived: amountReceived ?? this.amountReceived,
       changeAmount: changeAmount ?? this.changeAmount,
+      customerName: customerName ?? this.customerName,
     );
   }
 
@@ -1503,6 +1553,9 @@ class OrdersCompanion extends UpdateCompanion<Order> {
     if (changeAmount.present) {
       map['change_amount'] = Variable<double>(changeAmount.value);
     }
+    if (customerName.present) {
+      map['customer_name'] = Variable<String>(customerName.value);
+    }
     return map;
   }
 
@@ -1516,7 +1569,8 @@ class OrdersCompanion extends UpdateCompanion<Order> {
           ..write('createdAt: $createdAt, ')
           ..write('isSynced: $isSynced, ')
           ..write('amountReceived: $amountReceived, ')
-          ..write('changeAmount: $changeAmount')
+          ..write('changeAmount: $changeAmount, ')
+          ..write('customerName: $customerName')
           ..write(')'))
         .toString();
   }
@@ -3075,6 +3129,7 @@ typedef $$OrdersTableCreateCompanionBuilder =
       Value<bool> isSynced,
       Value<double?> amountReceived,
       Value<double?> changeAmount,
+      Value<String?> customerName,
     });
 typedef $$OrdersTableUpdateCompanionBuilder =
     OrdersCompanion Function({
@@ -3086,6 +3141,7 @@ typedef $$OrdersTableUpdateCompanionBuilder =
       Value<bool> isSynced,
       Value<double?> amountReceived,
       Value<double?> changeAmount,
+      Value<String?> customerName,
     });
 
 final class $$OrdersTableReferences
@@ -3157,6 +3213,11 @@ class $$OrdersTableFilterComposer
 
   ColumnFilters<double> get changeAmount => $composableBuilder(
     column: $table.changeAmount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customerName => $composableBuilder(
+    column: $table.customerName,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3234,6 +3295,11 @@ class $$OrdersTableOrderingComposer
     column: $table.changeAmount,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get customerName => $composableBuilder(
+    column: $table.customerName,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$OrdersTableAnnotationComposer
@@ -3276,6 +3342,11 @@ class $$OrdersTableAnnotationComposer
 
   GeneratedColumn<double> get changeAmount => $composableBuilder(
     column: $table.changeAmount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get customerName => $composableBuilder(
+    column: $table.customerName,
     builder: (column) => column,
   );
 
@@ -3341,6 +3412,7 @@ class $$OrdersTableTableManager
                 Value<bool> isSynced = const Value.absent(),
                 Value<double?> amountReceived = const Value.absent(),
                 Value<double?> changeAmount = const Value.absent(),
+                Value<String?> customerName = const Value.absent(),
               }) => OrdersCompanion(
                 id: id,
                 orderNumber: orderNumber,
@@ -3350,6 +3422,7 @@ class $$OrdersTableTableManager
                 isSynced: isSynced,
                 amountReceived: amountReceived,
                 changeAmount: changeAmount,
+                customerName: customerName,
               ),
           createCompanionCallback:
               ({
@@ -3361,6 +3434,7 @@ class $$OrdersTableTableManager
                 Value<bool> isSynced = const Value.absent(),
                 Value<double?> amountReceived = const Value.absent(),
                 Value<double?> changeAmount = const Value.absent(),
+                Value<String?> customerName = const Value.absent(),
               }) => OrdersCompanion.insert(
                 id: id,
                 orderNumber: orderNumber,
@@ -3370,6 +3444,7 @@ class $$OrdersTableTableManager
                 isSynced: isSynced,
                 amountReceived: amountReceived,
                 changeAmount: changeAmount,
+                customerName: customerName,
               ),
           withReferenceMapper: (p0) => p0
               .map(
