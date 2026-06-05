@@ -25,10 +25,12 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
   CheckoutStep _step = CheckoutStep.methodSelection;
   final _printerService = PrinterService();
   final _cashController = TextEditingController();
+  final _customerNameController = TextEditingController();
 
   @override
   void dispose() {
     _cashController.dispose();
+    _customerNameController.dispose();
     super.dispose();
   }
 
@@ -38,11 +40,13 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
     try {
       final cartSnapshot = ref.read(cartProvider);
       final total = ref.read(cartTotalProvider);
+      final customerName = _customerNameController.text.trim();
       final orderNumber =
           await ref.read(checkoutServiceProvider).processCheckout(
             method,
             amountReceived: amountReceived,
             changeAmount: changeAmount,
+            customerName: customerName.isNotEmpty ? customerName : null,
           );
 
       if (!mounted) return;
@@ -64,7 +68,16 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
         ),
       );
 
-      _showPrintOption(context, orderNumber, cartSnapshot, total, method, amountReceived, changeAmount);
+      _showPrintOption(
+        context,
+        orderNumber,
+        cartSnapshot,
+        total,
+        method,
+        amountReceived,
+        changeAmount,
+        customerName.isNotEmpty ? customerName : null,
+      );
     } on Exception catch (e) {
       if (!mounted) return;
       setState(() => _isProcessing = false);
@@ -82,8 +95,16 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
     }
   }
 
-  void _showPrintOption(BuildContext context, String orderNumber,
-      List<OrderItem> items, double total, String paymentMethod, double? amountReceived, double? changeAmount) {
+  void _showPrintOption(
+    BuildContext context,
+    String orderNumber,
+    List<OrderItem> items,
+    double total,
+    String paymentMethod,
+    double? amountReceived,
+    double? changeAmount,
+    String? customerName,
+  ) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -127,6 +148,7 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
                       paymentMethod: paymentMethod,
                       amountReceived: amountReceived,
                       changeAmount: changeAmount,
+                      customerName: customerName,
                     );
                     await PrintBluetoothThermal.writeBytes(bytes);
                     if (context.mounted) {
@@ -135,7 +157,16 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
                     }
                   } else {
                     if (context.mounted) {
-                      _showPrinterSelection(context, orderNumber, items, total, paymentMethod, amountReceived, changeAmount);
+                      _showPrinterSelection(
+                        context,
+                        orderNumber,
+                        items,
+                        total,
+                        paymentMethod,
+                        amountReceived,
+                        changeAmount,
+                        customerName,
+                      );
                     }
                   }
                 } catch (e) {
@@ -153,8 +184,16 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
     );
   }
 
-  void _showPrinterSelection(BuildContext context, String orderNumber,
-      List<OrderItem> items, double total, String paymentMethod, double? amountReceived, double? changeAmount) async {
+  void _showPrinterSelection(
+    BuildContext context,
+    String orderNumber,
+    List<OrderItem> items,
+    double total,
+    String paymentMethod,
+    double? amountReceived,
+    double? changeAmount,
+    String? customerName,
+  ) async {
     final devices = await _printerService.getDevices();
 
     if (!context.mounted) return;
@@ -192,6 +231,7 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
                               paymentMethod: paymentMethod,
                               amountReceived: amountReceived,
                               changeAmount: changeAmount,
+                              customerName: customerName,
                             );
                             await PrintBluetoothThermal.writeBytes(bytes);
                             if (context.mounted) {
@@ -264,6 +304,28 @@ class _CheckoutModalState extends ConsumerState<CheckoutModal> {
             size: 48,
             weight: FontWeight.bold,
             color: BinanceTheme.primary,
+          ),
+        ),
+
+        const SizedBox(height: BinanceTheme.spaceLg),
+
+        // Customer Name input field
+        TextField(
+          controller: _customerNameController,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            labelText: 'Customer Name (Optional)',
+            labelStyle: const TextStyle(color: BinanceTheme.muted),
+            filled: true,
+            fillColor: BinanceTheme.surfaceElevatedDark,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: BinanceTheme.primary),
+            ),
           ),
         ),
 
