@@ -55,7 +55,7 @@ class ProductGrid extends ConsumerWidget {
                           ? BinanceTheme.surfaceElevatedDark
                           : BinanceTheme.surfaceCardDark,
                       borderRadius: BinanceTheme.roundedLg,
-                      clipBehavior: Clip.antiAlias,
+                      clipBehavior: Clip.hardEdge,
                       child: InkWell(
                         onTap: () {
                           HapticFeedback.lightImpact();

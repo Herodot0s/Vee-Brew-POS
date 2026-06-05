@@ -15,7 +15,7 @@ class _BentoCardState extends State<BentoCard> {
         child: Card(
           elevation: _isHovered ? 8 : 2,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          clipBehavior: Clip.antiAlias,
+          clipBehavior: Clip.hardEdge,
           child: InkWell(
             onTap: widget.onTap,
             child: Padding(
