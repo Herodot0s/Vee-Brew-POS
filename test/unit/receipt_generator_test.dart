@@ -37,4 +37,31 @@ void main() {
     final hasCombinedLine = lines.any((l) => l.contains('DATE:') && l.contains('ORDER NO:'));
     expect(hasCombinedLine, isFalse, reason: 'Date and Order No should be on separate lines');
   });
+
+  test('ReceiptGenerator does not contain explicit feed commands', () async {
+    final items = [
+      const OrderItem(
+        product: Product(
+          id: 'mt_wintermelon',
+          name: 'Wintermelon Milk Tea',
+          basePrice: 28.0,
+          categoryId: 'milk_tea',
+        ),
+        selectedModifiers: [],
+      ),
+    ];
+
+    final bytes = await ReceiptGenerator.generateBytes('VEE-1001', items, 28.0);
+
+    // ESC/POS feed command is ESC d n (27, 100, n)
+    bool hasFeedCommand = false;
+    for (int i = 0; i < bytes.length - 2; i++) {
+      if (bytes[i] == 27 && bytes[i + 1] == 100) {
+        hasFeedCommand = true;
+        break;
+      }
+    }
+
+    expect(hasFeedCommand, isFalse, reason: 'Should not contain ESC/POS feed (27, 100) commands');
+  });
 }

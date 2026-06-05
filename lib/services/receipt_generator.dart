@@ -119,7 +119,6 @@ class ReceiptGenerator {
               styles: const PosStyles(align: PosAlign.left));
         }
       }
-      bytes += generator.feed(1); // Space between items
     }
 
     bytes += generator.text('-' * width, styles: const PosStyles(align: PosAlign.center));
@@ -129,8 +128,6 @@ class ReceiptGenerator {
         styles: const PosStyles(align: PosAlign.left));
     bytes += generator.text(justify("TOTAL:", total.toStringAsFixed(2), width: width),
         styles: const PosStyles(align: PosAlign.left));
-
-    bytes += generator.feed(1);
 
     // Payment details
     bytes += generator.text("PAYMENT METHOD: ${paymentMethod.toUpperCase()}",
@@ -151,7 +148,6 @@ class ReceiptGenerator {
 
     bytes += generator.text('=' * width, styles: const PosStyles(align: PosAlign.center));
 
-    bytes += generator.feed(2);
     bytes += generator.cut();
 
     return bytes;
