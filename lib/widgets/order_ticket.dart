@@ -16,6 +16,7 @@ class OrderTicket extends ConsumerWidget {
     final cartNotifier = ref.read(cartProvider.notifier);
     final categoriesAsync = ref.watch(categoriesStreamProvider);
     final categories = categoriesAsync.value ?? [];
+    final categoryMap = {for (final c in categories) c.id: c.name};
 
     return Container(
       color: BinanceTheme.surfaceCardDark,
@@ -43,14 +44,7 @@ class OrderTicket extends ConsumerWidget {
                     .map((m) => m.name)
                     .join(', ');
 
-                Category? matchedCategory;
-                for (final c in categories) {
-                  if (c.id == item.product.categoryId) {
-                    matchedCategory = c;
-                    break;
-                  }
-                }
-                final categoryName = matchedCategory?.name ?? 'Unknown';
+                final categoryName = categoryMap[item.product.categoryId] ?? 'Unknown';
 
                 return Material(
                   color: Colors.transparent,
