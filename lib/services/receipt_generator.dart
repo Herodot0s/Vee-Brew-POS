@@ -36,6 +36,7 @@ class ReceiptGenerator {
     String paymentMethod = 'GCash',
     double? amountReceived,
     double? changeAmount,
+    String? customerName,
   }) async {
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm58, profile);
@@ -65,6 +66,11 @@ class ReceiptGenerator {
         styles: const PosStyles(align: PosAlign.left));
     bytes += generator.text("ORDER NO: $orderNumber",
         styles: const PosStyles(align: PosAlign.left));
+
+    if (customerName != null && customerName.trim().isNotEmpty) {
+      bytes += generator.text("CUSTOMER: ${customerName.trim().toUpperCase()}",
+          styles: const PosStyles(align: PosAlign.left));
+    }
 
     // Inner divider
     bytes += generator.text('-' * width, styles: const PosStyles(align: PosAlign.center));

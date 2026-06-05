@@ -64,4 +64,52 @@ void main() {
 
     expect(hasFeedCommand, isFalse, reason: 'Should not contain ESC/POS feed (27, 100) commands');
   });
+
+  test('ReceiptGenerator includes customer name when provided', () async {
+    final items = [
+      const OrderItem(
+        product: Product(
+          id: 'mt_wintermelon',
+          name: 'Wintermelon Milk Tea',
+          basePrice: 28.0,
+          categoryId: 'milk_tea',
+        ),
+        selectedModifiers: [],
+      ),
+    ];
+
+    final bytes = await ReceiptGenerator.generateBytes(
+      'VEE-1001',
+      items,
+      28.0,
+      customerName: 'Juan Dela Cruz',
+    );
+    final receiptText = String.fromCharCodes(bytes);
+
+    expect(receiptText.contains('CUSTOMER: JUAN DELA CRUZ'), isTrue);
+  });
+
+  test('ReceiptGenerator omits customer name line when not provided or empty', () async {
+    final items = [
+      const OrderItem(
+        product: Product(
+          id: 'mt_wintermelon',
+          name: 'Wintermelon Milk Tea',
+          basePrice: 28.0,
+          categoryId: 'milk_tea',
+        ),
+        selectedModifiers: [],
+      ),
+    ];
+
+    final bytes = await ReceiptGenerator.generateBytes(
+      'VEE-1001',
+      items,
+      28.0,
+      customerName: '',
+    );
+    final receiptText = String.fromCharCodes(bytes);
+
+    expect(receiptText.contains('CUSTOMER:'), isFalse);
+  });
 }
