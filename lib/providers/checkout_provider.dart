@@ -21,6 +21,7 @@ class CheckoutService {
     String paymentMethod, {
     double? amountReceived,
     double? changeAmount,
+    String? customerName,
   }) async {
     if (!['Cash', 'GCash'].contains(paymentMethod)) {
       throw Exception('Unsupported payment method: $paymentMethod');
@@ -58,6 +59,7 @@ class CheckoutService {
               isSynced: const Value(false),
               amountReceived: Value(amountReceived),
               changeAmount: Value(changeAmount),
+              customerName: Value(customerName),
             ),
           );
 

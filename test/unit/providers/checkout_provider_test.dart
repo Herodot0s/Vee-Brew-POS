@@ -67,4 +67,29 @@ void main() {
 
     await db.close();
   });
+
+  test('CheckoutService saves optional customer name', () async {
+    final db = AppDatabase.memory();
+    final container = ProviderContainer(
+      overrides: [
+        databaseProvider.overrideWithValue(db),
+      ],
+    );
+
+    final cartNotifier = container.read(cartProvider.notifier);
+    cartNotifier.addConfiguredItem(
+      const OrderItem(
+        product: Product(id: 'prod1', name: 'Coffee', basePrice: 100.0, categoryId: 'cat1'),
+        selectedModifiers: [],
+      ),
+    );
+
+    final service = container.read(checkoutServiceProvider);
+    final orderNum = await service.processCheckout('GCash', customerName: 'Alice');
+
+    final order = await (db.select(db.orders)..where((t) => t.orderNumber.equals(orderNum))).getSingle();
+    expect(order.customerName, 'Alice');
+
+    await db.close();
+  });
 }
