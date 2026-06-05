@@ -246,5 +246,160 @@ void main() {
     final mods = await (db.select(db.modifiers)..where((t) => t.id.equals('add_pearl'))).get();
     expect(mods.isEmpty, isTrue);
   });
+
+  test('Bulk insert modifier for multiple products', () async {
+    // Seed category
+    await db.into(db.categories).insert(
+      const CategoriesCompanion(
+        id: Value('beverage'),
+        name: Value('Beverage'),
+        sortOrder: Value(0),
+      ),
+    );
+
+    // Seed two products
+    await db.into(db.products).insert(
+      const ProductsCompanion(
+        id: Value('p1'),
+        name: Value('Product 1'),
+        basePrice: Value(10.0),
+        categoryId: Value('beverage'),
+      ),
+    );
+    await db.into(db.products).insert(
+      const ProductsCompanion(
+        id: Value('p2'),
+        name: Value('Product 2'),
+        basePrice: Value(12.0),
+        categoryId: Value('beverage'),
+      ),
+    );
+
+    // Perform bulk insert simulation
+    final newId = 'test_bulk_mod';
+    final selectedProductIds = {'p1', 'p2'};
+    await db.transaction(() async {
+      for (final prodId in selectedProductIds) {
+        await db.into(db.modifiers).insert(
+          ModifiersCompanion.insert(
+            id: newId,
+            productId: prodId,
+            name: 'Extra Shot',
+            priceDelta: 1.5,
+            groupName: 'Addons',
+          ),
+        );
+      }
+    });
+
+    // Assert rows created
+    final mods = await (db.select(db.modifiers)..where((t) => t.id.equals(newId))).get();
+    expect(mods.length, 2);
+    expect(mods.any((m) => m.productId == 'p1'), isTrue);
+    expect(mods.any((m) => m.productId == 'p2'), isTrue);
+  });
+
+  test('Edit existing modifier assignments (additions, deletions, and field updates)', () async {
+    // Seed category
+    await db.into(db.categories).insert(
+      const CategoriesCompanion(
+        id: Value('beverage'),
+        name: Value('Beverage'),
+        sortOrder: Value(0),
+      ),
+    );
+
+    // Seed products
+    await db.into(db.products).insert(
+      const ProductsCompanion(
+        id: Value('p1'),
+        name: Value('Product 1'),
+        basePrice: Value(10.0),
+        categoryId: Value('beverage'),
+      ),
+    );
+    await db.into(db.products).insert(
+      const ProductsCompanion(
+        id: Value('p2'),
+        name: Value('Product 2'),
+        basePrice: Value(12.0),
+        categoryId: Value('beverage'),
+      ),
+    );
+    await db.into(db.products).insert(
+      const ProductsCompanion(
+        id: Value('p3'),
+        name: Value('Product 3'),
+        basePrice: Value(15.0),
+        categoryId: Value('beverage'),
+      ),
+    );
+
+    // Initially assign modifier to p1 and p2
+    final modId = 'test_edit_mod';
+    await db.into(db.modifiers).insert(ModifiersCompanion.insert(id: modId, productId: 'p1', name: 'Original', priceDelta: 1.0, groupName: 'Grp'));
+    await db.into(db.modifiers).insert(ModifiersCompanion.insert(id: modId, productId: 'p2', name: 'Original', priceDelta: 1.0, groupName: 'Grp'));
+
+    // Simulation of editing assignments to p2 and p3 (p1 is removed, p3 is added, fields updated)
+    final selectedProductIds = {'p2', 'p3'};
+    final name = 'Updated';
+    final price = 2.0;
+    final group = 'New Grp';
+
+    await db.transaction(() async {
+      final existing = await (db.select(db.modifiers)..where((t) => t.id.equals(modId))).get();
+      final existingProdIds = existing.map((m) => m.productId).toSet();
+
+      // Additions
+      final toAdd = selectedProductIds.difference(existingProdIds);
+      for (final prodId in toAdd) {
+        await db.into(db.modifiers).insert(
+          ModifiersCompanion.insert(
+            id: modId,
+            productId: prodId,
+            name: name,
+            priceDelta: price,
+            groupName: group,
+          ),
+        );
+      }
+
+      // Deletions
+      final toDelete = existingProdIds.difference(selectedProductIds);
+      if (toDelete.isNotEmpty) {
+        await (db.delete(db.modifiers)
+              ..where((t) => t.id.equals(modId) & t.productId.isIn(toDelete)))
+            .go();
+      }
+
+      // Updates
+      final remaining = selectedProductIds.intersection(existingProdIds);
+      if (remaining.isNotEmpty) {
+        await (db.update(db.modifiers)
+              ..where((t) => t.id.equals(modId) & t.productId.isIn(remaining)))
+            .write(
+              ModifiersCompanion(
+                name: Value(name),
+                priceDelta: Value(price),
+                groupName: Value(group),
+              ),
+            );
+      }
+    });
+
+    // Assert final database state
+    final finalMods = await (db.select(db.modifiers)..where((t) => t.id.equals(modId))).get();
+    expect(finalMods.length, 2);
+    expect(finalMods.any((m) => m.productId == 'p1'), isFalse); // Deleted
+    expect(finalMods.any((m) => m.productId == 'p2'), isTrue);  // Maintained & Updated
+    expect(finalMods.any((m) => m.productId == 'p3'), isTrue);  // Added
+
+    for (final m in finalMods) {
+      expect(m.name, 'Updated');
+      expect(m.priceDelta, 2.0);
+      expect(m.groupName, 'New Grp');
+    }
+  });
 }
+
 
