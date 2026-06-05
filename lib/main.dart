@@ -2,11 +2,13 @@ import 'dart:ffi';
 import 'package:sqlite3/open.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'screens/pos_screen.dart';
 import 'providers/database_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   open.overrideFor(OperatingSystem.android, () {
     try {
