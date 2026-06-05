@@ -54,11 +54,6 @@ class ReceiptGenerator {
             width: PosTextSize.size2,
             bold: true));
 
-    // Store details
-    bytes += generator.text("15 Nueva Ecija Street, Barangay Ramon",
-        styles: const PosStyles(align: PosAlign.center));
-    bytes += generator.text("Magsaysay Bago bantay QC",
-        styles: const PosStyles(align: PosAlign.center));
     bytes += generator.text("FB Page: veebrew",
         styles: const PosStyles(align: PosAlign.center));
     
@@ -66,9 +61,9 @@ class ReceiptGenerator {
     bytes += generator.text('=' * width, styles: const PosStyles(align: PosAlign.center));
 
     // Date and Order Number
-    final dateStr = "DATE: ${_formatDateTime(DateTime.now())}";
-    final orderStr = "ORDER NO: $orderNumber";
-    bytes += generator.text(justify(dateStr, orderStr, width: width),
+    bytes += generator.text("DATE: ${_formatDateTime(DateTime.now())}",
+        styles: const PosStyles(align: PosAlign.left));
+    bytes += generator.text("ORDER NO: $orderNumber",
         styles: const PosStyles(align: PosAlign.left));
 
     // Inner divider
