@@ -4,6 +4,8 @@ import '../providers/cart_provider.dart';
 import '../theme/binance_theme.dart';
 import 'checkout_modal.dart';
 import 'modifier_bottom_sheet.dart';
+import '../providers/data_providers.dart';
+import '../database/drift_database.dart' show Category;
 
 class OrderTicket extends ConsumerWidget {
   const OrderTicket({super.key});
@@ -12,6 +14,8 @@ class OrderTicket extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cart = ref.watch(cartProvider);
     final cartNotifier = ref.read(cartProvider.notifier);
+    final categoriesAsync = ref.watch(categoriesStreamProvider);
+    final categories = categoriesAsync.value ?? [];
 
     return Container(
       color: BinanceTheme.surfaceCardDark,
@@ -38,6 +42,16 @@ class OrderTicket extends ConsumerWidget {
                 final modsText = item.selectedModifiers
                     .map((m) => m.name)
                     .join(', ');
+
+                Category? matchedCategory;
+                for (final c in categories) {
+                  if (c.id == item.product.categoryId) {
+                    matchedCategory = c;
+                    break;
+                  }
+                }
+                final categoryName = matchedCategory?.name ?? 'Unknown';
+
                 return Material(
                   color: Colors.transparent,
                   child: ListTile(
@@ -54,7 +68,7 @@ class OrderTicket extends ConsumerWidget {
                       vertical: BinanceTheme.spaceXs,
                     ),
                     title: Text(
-                      item.product.name,
+                      '[$categoryName] ${item.product.name}',
                       style: BinanceTheme.titleStyle(
                         size: 14,
                         color: BinanceTheme.body,
